@@ -19,7 +19,6 @@ export const KitchenKDSPage: React.FC<KitchenKDSPageProps> = ({
   onNavigateToMenu,
 }) => {
   const [orders, setOrders] = useState<OrderRecord[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   const fetchKitchenOrders = async () => {
     try {
@@ -27,8 +26,6 @@ export const KitchenKDSPage: React.FC<KitchenKDSPageProps> = ({
       setOrders(data);
     } catch (err) {
       console.error('Error fetching kitchen orders:', err);
-    } finally {
-      setIsLoading(false);
     }
   };
 
