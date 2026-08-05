@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import type { AuthUser } from '../types';
 import { Input } from '../components/common/Input';
 import { Button } from '../components/common/Button';
-import { QrCode, Lock, Mail, AlertCircle } from 'lucide-react';
+import { QrCode, Lock, User, AlertCircle } from 'lucide-react';
 
 interface LoginPageProps {
   onLoginSuccess: (user: AuthUser) => void;
@@ -44,17 +44,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
       const data = await api.login({ email, password });
       onLoginSuccess(data.user);
     } catch (err: any) {
-      // Fallback demo login if MySQL server is offline or unseeded
-      if (email === 'kitchen@cafeqr.com' && password === 'kitchen123') {
+      // Fallback demo login if database server is offline or unseeded
+      if ((email === 'kitchen@cafeqr.com' || email === 'kitchen') && password === 'kitchen123') {
         localStorage.setItem('cafeqr_token', 'demo_kitchen_jwt_token');
         localStorage.setItem('cafeqr_user', JSON.stringify(MOCK_KITCHEN_USER));
         onLoginSuccess(MOCK_KITCHEN_USER);
-      } else if (email === 'admin@cafeqr.com' && password === 'admin123') {
+      } else if ((email === 'admin@cafeqr.com' || email === 'admin') && password === 'admin123') {
         localStorage.setItem('cafeqr_token', 'demo_admin_jwt_token');
         localStorage.setItem('cafeqr_user', JSON.stringify(MOCK_ADMIN_USER));
         onLoginSuccess(MOCK_ADMIN_USER);
       } else {
-        setError(err.message || 'Invalid email or password.');
+        setError(err.message || 'Invalid ID or password.');
       }
     } finally {
       setIsLoading(false);
@@ -84,12 +84,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <Input
-            label="Email Address"
-            type="email"
-            placeholder="Enter your email"
+            label="Staff ID / Email"
+            type="text"
+            placeholder="Enter your User ID or Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            icon={<Mail className="w-4 h-4" />}
+            icon={<User className="w-4 h-4" />}
             required
           />
 
