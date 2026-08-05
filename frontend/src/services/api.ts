@@ -87,6 +87,11 @@ const MOCK_PRODUCTS: Product[] = [
   { id: 'prod_7', categoryId: 'cat_7', categoryName: 'Desserts', name: 'Molten Belgian Lava Cake', description: 'Warm chocolate cake with oozing center.', price: 219.0, image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 12 },
 ];
 
+let MOCK_STAFF: AuthUser[] = [
+  { id: 'usr_1', staffId: 'STF-101', name: 'Cafe Admin Manager', email: 'admin@cafeqr.com', role: 'ADMIN', cafeId: 'cafe_1', cafeName: 'My Cafe', currency: '₹', createdAt: new Date().toISOString() },
+  { id: 'usr_2', staffId: 'STF-102', name: 'Head Chef', email: 'kitchen@cafeqr.com', role: 'KITCHEN', cafeId: 'cafe_1', cafeName: 'My Cafe', currency: '₹', createdAt: new Date().toISOString() },
+];
+
 let MOCK_ORDERS: OrderRecord[] = [
   {
     id: 'ord_105',
@@ -536,12 +541,13 @@ export const api = {
   async getStaff(): Promise<AuthUser[]> {
     try {
       const res = await fetch(`${API_BASE_URL}/admin/staff`, { headers: await getAuthHeaders('ADMIN') });
-      return await handleResponse(res);
+      const data = await handleResponse<AuthUser[]>(res);
+      if (Array.isArray(data) && data.length > 0) {
+        return data;
+      }
+      return MOCK_STAFF;
     } catch (err) {
-      return [
-        { id: 'usr_1', name: 'Cafe Admin Manager', email: 'admin@cafeqr.com', role: 'ADMIN', cafeId: 'cafe_1', cafeName: 'My Cafe', currency: '₹' },
-        { id: 'usr_2', name: 'Head Chef', email: 'kitchen@cafeqr.com', role: 'KITCHEN', cafeId: 'cafe_1', cafeName: 'My Cafe', currency: '₹' },
-      ];
+      return MOCK_STAFF;
     }
   },
 
@@ -552,17 +558,23 @@ export const api = {
         headers: await getAuthHeaders('ADMIN'),
         body: JSON.stringify(data),
       });
-      return await handleResponse(res);
+      const newStaff = await handleResponse<AuthUser>(res);
+      MOCK_STAFF.unshift(newStaff);
+      return newStaff;
     } catch (err) {
-      return {
+      const fallbackStaff: AuthUser = {
         id: 'usr_' + Date.now(),
+        staffId: `STF-${(101 + MOCK_STAFF.length).toString().padStart(3, '0')}`,
         name: data.name,
         email: data.email,
         role: data.role as any,
         cafeId: 'cafe_1',
         cafeName: 'My Cafe',
         currency: '₹',
+        createdAt: new Date().toISOString(),
       };
+      MOCK_STAFF.unshift(fallbackStaff);
+      return fallbackStaff;
     }
   },
 
@@ -572,8 +584,11 @@ export const api = {
         method: 'DELETE',
         headers: await getAuthHeaders('ADMIN'),
       });
-      return await handleResponse(res);
+      const result = await handleResponse<{ message: string }>(res);
+      MOCK_STAFF = MOCK_STAFF.filter((s) => s.id !== id);
+      return result;
     } catch (err) {
+      MOCK_STAFF = MOCK_STAFF.filter((s) => s.id !== id);
       return { message: 'Staff account deleted' };
     }
   },

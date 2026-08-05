@@ -117,7 +117,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         setOrders(res);
       } else if (currentTab === 'staff') {
         const res = await api.getStaff();
-        setStaff(res);
+        setStaff(Array.isArray(res) ? res : []);
       } else if (currentTab === 'settings') {
         const res = await api.getSettings();
         setSettings(res);
