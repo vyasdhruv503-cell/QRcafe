@@ -4,7 +4,7 @@
   "private": true,
   "description": "CafeQR — Smart Digital Menu & Table Ordering System",
   "scripts": {
-    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "install:all": "npm install --include=dev && cd backend && npm install --include=dev && cd ../frontend && npm install --include=dev",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
     "dev:frontend:host": "cd frontend && npm run dev:host",
