@@ -24,7 +24,7 @@ export const App: React.FC = () => {
     } else {
       if (newView === 'admin') window.history.pushState({}, '', '/admin');
       else if (newView === 'kitchen') window.history.pushState({}, '', '/kitchen');
-      else if (newView === 'login') window.history.pushState({}, '', '/login');
+      else if (newView === 'login') window.history.pushState({}, '', '/admin/login');
       else if (newView === 'customer_menu') window.history.pushState({}, '', '/');
     }
   };
@@ -86,9 +86,9 @@ export const App: React.FC = () => {
     // Listen for back/forward browser navigation
     const handlePopState = () => {
       const p = window.location.pathname;
-      if (p.includes('/admin')) setView('admin');
+      if (p.includes('/admin/login') || p.includes('/login')) setView('login');
+      else if (p.includes('/admin')) setView('admin');
       else if (p.includes('/kitchen')) setView('kitchen');
-      else if (p.includes('/login')) setView('login');
       else setView('customer_menu');
     };
 
