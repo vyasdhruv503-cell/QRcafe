@@ -1,0 +1,169 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Cafe {
+  id          String       @id @default(uuid())
+  name        String
+  logo        String?
+  address     String?
+  phone       String?
+  email       String?
+  taxRate     Float        @default(5.00)
+  currency    String       @default("₹")
+  openHours   String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  users       User[]
+  categories  Category[]
+  products    Product[]
+  tables      CafeTable[]
+  orders      Order[]
+
+  @@map("cafes")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  cafeId    String
+  email     String   @unique
+  password  String
+  name      String
+  role      String   @default("ADMIN") // ADMIN or KITCHEN
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cafe      Cafe     @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+
+  @@index([cafeId])
+  @@map("users")
+}
+
+model Category {
+  id          String    @id @default(uuid())
+  cafeId      String
+  name        String
+  description String?
+  image       String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  cafe        Cafe      @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+  products    Product[]
+
+  @@index([cafeId])
+  @@map("categories")
+}
+
+model Product {
+  id              String      @id @default(uuid())
+  cafeId          String
+  categoryId      String
+  name            String
+  description     String?
+  price           Float
+  image           String?
+  isAvailable     Boolean     @default(true)
+  isFeatured      Boolean     @default(false)
+  preparationTime Int?        @default(15)
+  isVeg           Boolean     @default(true)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  cafe            Cafe        @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+  category        Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  orderItems      OrderItem[]
+
+  @@index([cafeId])
+  @@index([categoryId])
+  @@map("products")
+}
+
+model CafeTable {
+  id        String   @id @default(uuid())
+  cafeId    String
+  number    String
+  capacity  Int      @default(4)
+  qrToken   String   @unique
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cafe      Cafe     @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+  orders    Order[]
+
+  @@index([cafeId])
+  @@map("cafe_tables")
+}
+
+model Order {
+  id            String        @id @default(uuid())
+  orderNumber   Int           // Set programmatically on creation
+  orderToken    String        @unique @default(uuid())
+  cafeId        String
+  tableId       String
+  customerName  String?
+  customerPhone String?
+  subtotal      Float
+  tax           Float
+  discount      Float         @default(0.00)
+  total         Float
+  paymentStatus String        @default("PENDING") // PENDING, PAID, FAILED, REFUNDED
+  paymentMethod String        @default("PAY_AT_COUNTER") // CASH, PAY_AT_COUNTER, ONLINE
+  orderStatus   String        @default("PENDING") // PENDING, ACCEPTED, PREPARING, READY, COMPLETED, CANCELLED
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  cafe          Cafe          @relation(fields: [cafeId], references: [id], onDelete: Cascade)
+  table         CafeTable     @relation(fields: [tableId], references: [id], onDelete: Restrict)
+  orderItems    OrderItem[]
+  payments      Payment[]
+
+  @@index([cafeId])
+  @@index([tableId])
+  @@index([orderToken])
+  @@map("orders")
+}
+
+model OrderItem {
+  id                  String   @id @default(uuid())
+  orderId             String
+  productId           String
+  productNameSnapshot String
+  priceSnapshot       Float
+  quantity            Int
+  subtotal            Float
+  specialNote         String?
+  createdAt           DateTime @default(now())
+
+  order               Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product             Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  orderId       String
+  amount        Float
+  paymentMethod String
+  status        String
+  transactionId String?
+  createdAt     DateTime      @default(now())
+
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("payments")
+}

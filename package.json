@@ -1,0 +1,30 @@
+{
+  "name": "cafeqr-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CafeQR — Smart Digital Menu & Table Ordering System",
+  "scripts": {
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:frontend:host": "cd frontend && npm run dev:host",
+    "build:backend": "cd backend && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "build": "npm run build:backend && npm run build:frontend",
+    "start": "cd backend && npm start",
+    "render-build": "npm run install:all && npm run prisma:generate && npm run prisma:push && npm run prisma:seed && npm run build",
+    "prisma:generate": "cd backend && npx prisma generate --schema=../prisma/schema.prisma",
+    "prisma:push": "cd backend && npx prisma db push --schema=../prisma/schema.prisma",
+    "prisma:seed": "cd backend && npx ts-node ../prisma/seed.ts",
+    "test": "node tests/unit/orderCalculation.test.js && node tests/integration/priceTampering.test.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "prisma": "^5.22.0"
+  }
+}
