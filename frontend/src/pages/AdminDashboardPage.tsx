@@ -414,9 +414,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                         <td className="p-4 font-extrabold text-stone-900">₹{p.price.toFixed(2)}</td>
                         <td className="p-4">
                           <span
-                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                              p.isVeg ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-                            }`}
+                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${p.isVeg ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                              }`}
                           >
                             {p.isVeg ? 'VEG' : 'NON-VEG'}
                           </span>
@@ -427,11 +426,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                               await api.toggleProduct(p.id);
                               loadTabData();
                             }}
-                            className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-                              p.isAvailable
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : 'bg-stone-200 text-stone-600'
-                            }`}
+                            className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${p.isAvailable
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : 'bg-stone-200 text-stone-600'
+                              }`}
                           >
                             {p.isAvailable ? <ToggleRight className="w-4 h-4 text-emerald-600" /> : <ToggleLeft className="w-4 h-4" />}
                             {p.isAvailable ? 'Available' : 'Disabled'}
@@ -642,11 +640,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       const todayStr = new Date().toISOString().split('T')[0];
                       setOrderDateFilter(todayStr);
                     }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                      orderDateFilter === new Date().toISOString().split('T')[0]
-                        ? 'bg-amber-100 text-amber-900 border-amber-300'
-                        : 'bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100'
-                    }`}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${orderDateFilter === new Date().toISOString().split('T')[0]
+                      ? 'bg-amber-100 text-amber-900 border-amber-300'
+                      : 'bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100'
+                      }`}
                   >
                     Today
                   </button>
@@ -681,11 +678,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       <button
                         key={st}
                         onClick={() => setOrderStatusFilter(st)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                          orderStatusFilter === st
-                            ? 'bg-amber-600 text-white shadow-xs'
-                            : 'bg-white text-stone-600 border border-stone-200'
-                        }`}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${orderStatusFilter === st
+                          ? 'bg-amber-600 text-white shadow-xs'
+                          : 'bg-white text-stone-600 border border-stone-200'
+                          }`}
                       >
                         {st}
                       </button>
@@ -823,11 +819,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                         <td className="p-4 font-mono text-stone-600">{s.email}</td>
                         <td className="p-4">
                           <span
-                            className={`px-2.5 py-1 rounded-xl text-[10px] font-bold ${
-                              s.role === 'ADMIN'
-                                ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                                : 'bg-blue-100 text-blue-800 border border-blue-200'
-                            }`}
+                            className={`px-2.5 py-1 rounded-xl text-[10px] font-bold ${s.role === 'ADMIN'
+                              ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                              : 'bg-blue-100 text-blue-800 border border-blue-200'
+                              }`}
                           >
                             {s.role}
                           </span>
@@ -835,10 +830,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                         <td className="p-4 text-stone-400">
                           {s.createdAt
                             ? new Date(s.createdAt).toLocaleDateString([], {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              })
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })
                             : new Date().toLocaleDateString()}
                         </td>
                         <td className="p-4 text-right">

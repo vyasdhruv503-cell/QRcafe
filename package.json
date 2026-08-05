@@ -15,7 +15,7 @@
     "render-build": "npm run install:all && npm run prisma:generate && npm run prisma:push && npm run prisma:seed && npm run build",
     "prisma:generate": "cd backend && npx prisma generate --schema=../prisma/schema.prisma",
     "prisma:push": "cd backend && npx prisma db push --schema=../prisma/schema.prisma",
-    "prisma:seed": "cd backend && npx ts-node ../prisma/seed.ts",
+    "prisma:seed": "node prisma/seed.js",
     "test": "node tests/unit/orderCalculation.test.js && node tests/integration/priceTampering.test.js"
   },
   "dependencies": {
