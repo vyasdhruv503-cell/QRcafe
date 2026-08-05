@@ -44,17 +44,6 @@ export const Header: React.FC<HeaderProps> = ({ cafe, table, onStaffLogin }) => 
 
         {/* Right Badge Controls */}
         <div className="flex items-center gap-2">
-          {onStaffLogin && (
-            <button
-              onClick={onStaffLogin}
-              title="Staff Portal Login"
-              className="text-[11px] font-bold text-stone-300 hover:text-amber-400 bg-stone-800 hover:bg-stone-700 px-2.5 py-1.5 rounded-xl border border-stone-700 transition-all flex items-center gap-1 shadow-2xs"
-            >
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-500" />
-              <span className="hidden sm:inline">Staff</span>
-            </button>
-          )}
-
           <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-3 py-1.5 rounded-2xl text-xs font-black shadow-xs flex items-center gap-1.5 shrink-0">
             <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
             {table.number}
