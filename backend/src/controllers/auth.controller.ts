@@ -8,19 +8,32 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   try {
     const validated = loginSchema.parse(req.body);
 
-    const user = await prisma.user.findUnique({
-      where: { email: validated.email },
+    const userInput = validated.email.trim();
+
+    const users = await prisma.user.findMany({
       include: { cafe: true },
     });
 
+    const user = users.find((u, index) => {
+      const staffId = `STF-${(101 + index).toString().padStart(3, '0')}`;
+      return (
+        u.email.toLowerCase() === userInput.toLowerCase() ||
+        u.id === userInput ||
+        staffId.toLowerCase() === userInput.toLowerCase() ||
+        u.name.toLowerCase() === userInput.toLowerCase() ||
+        (userInput.toLowerCase() === 'admin' && u.role === 'ADMIN') ||
+        (userInput.toLowerCase() === 'kitchen' && u.role === 'KITCHEN')
+      );
+    });
+
     if (!user) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
+      return res.status(401).json({ error: 'Invalid Staff ID / Email or password.' });
     }
 
     const isValidPassword = await bcrypt.compare(validated.password, user.password);
 
     if (!isValidPassword) {
-      return res.status(401).json({ error: 'Invalid email or password.' });
+      return res.status(401).json({ error: 'Invalid Staff ID / Email or password.' });
     }
 
     const jwtSecret = process.env.JWT_SECRET || 'super-secret-jwt-key-change-in-production-cafeqr-2026';

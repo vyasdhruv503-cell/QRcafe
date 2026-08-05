@@ -550,6 +550,11 @@ export const createStaff = async (req: Request, res: Response, next: NextFunctio
       return res.status(400).json({ error: 'Name, email, and password are required.' });
     }
 
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      return res.status(400).json({ error: 'A staff account with this email already exists.' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await prisma.user.create({
