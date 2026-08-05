@@ -25,6 +25,7 @@ import {
   Search,
   Calendar,
   History,
+  IdCard,
   X,
 } from 'lucide-react';
 import {
@@ -808,12 +809,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       <th className="p-4">Name</th>
                       <th className="p-4">Email</th>
                       <th className="p-4">Role</th>
+                      <th className="p-4">Staff ID</th>
                       <th className="p-4">Created Date</th>
                       <th className="p-4 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-stone-100 font-medium">
-                    {staff.map((s) => (
+                    {staff.map((s, index) => (
                       <tr key={s.id} className="hover:bg-stone-50/80 transition-colors">
                         <td className="p-4 font-bold text-stone-900">{s.name}</td>
                         <td className="p-4 font-mono text-stone-600">{s.email}</td>
@@ -825,6 +827,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                               }`}
                           >
                             {s.role}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className="bg-stone-900 text-amber-400 font-mono text-xs font-black px-2.5 py-1 rounded-xl shadow-2xs inline-flex items-center gap-1.5 border border-stone-800">
+                            <IdCard className="w-3.5 h-3.5 text-amber-500" />
+                            {s.staffId || `STF-${(101 + index).toString().padStart(3, '0')}`}
                           </span>
                         </td>
                         <td className="p-4 text-stone-400">
@@ -1057,6 +1065,15 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         title="Add Staff Account"
       >
         <form onSubmit={handleCreateStaff} className="space-y-4 text-xs">
+          <div className="p-3 bg-stone-900 text-stone-200 rounded-2xl flex items-center justify-between shadow-xs">
+            <span className="text-[11px] font-bold text-stone-400 flex items-center gap-1.5">
+              <IdCard className="w-4 h-4 text-amber-500" />
+              Staff ID Generation:
+            </span>
+            <span className="font-mono font-black text-amber-400 text-xs px-2.5 py-1 bg-stone-800 rounded-xl border border-stone-700">
+              Auto-Generated (e.g. STF-{(101 + staff.length).toString().padStart(3, '0')})
+            </span>
+          </div>
           <Input label="Full Name" name="name" required />
           <Input label="Email Address" name="email" type="email" required />
           <Input label="Password" name="password" type="password" required />

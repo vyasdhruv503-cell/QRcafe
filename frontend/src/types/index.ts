@@ -95,6 +95,7 @@ export const OrderRecord = {};
 
 export interface AuthUser {
   id: string;
+  staffId?: string;
   name: string;
   email: string;
   role: 'ADMIN' | 'KITCHEN';

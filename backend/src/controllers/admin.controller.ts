@@ -530,7 +530,12 @@ export const getStaffList = async (req: Request, res: Response, next: NextFuncti
       orderBy: { createdAt: 'desc' },
     });
 
-    res.json(staff);
+    const staffWithIds = staff.map((s, index) => ({
+      ...s,
+      staffId: `STF-${(101 + index).toString().padStart(3, '0')}`,
+    }));
+
+    res.json(staffWithIds);
   } catch (error) {
     next(error);
   }
@@ -558,7 +563,13 @@ export const createStaff = async (req: Request, res: Response, next: NextFunctio
       select: { id: true, name: true, email: true, role: true, createdAt: true },
     });
 
-    res.status(201).json(user);
+    const userCount = await prisma.user.count({ where: { cafeId } });
+    const userWithStaffId = {
+      ...user,
+      staffId: `STF-${(100 + userCount).toString().padStart(3, '0')}`,
+    };
+
+    res.status(201).json(userWithStaffId);
   } catch (error) {
     next(error);
   }
