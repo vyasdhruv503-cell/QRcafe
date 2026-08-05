@@ -150,6 +150,7 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
 
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isVegOnly, setIsVegOnly] = useState<boolean>(false);
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -249,7 +250,7 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
     }
   };
 
-  // Filter products by category and search
+  // Filter products by category, search, and veg preference
   const filteredProducts = useMemo(() => {
     return products.filter((p) => {
       const matchesCategory = selectedCategory === 'ALL' || p.categoryId === selectedCategory;
@@ -257,9 +258,10 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
         searchQuery.trim() === '' ||
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
-      return matchesCategory && matchesSearch;
+      const matchesVeg = !isVegOnly || p.isVeg;
+      return matchesCategory && matchesSearch && matchesVeg;
     });
-  }, [products, selectedCategory, searchQuery]);
+  }, [products, selectedCategory, searchQuery, isVegOnly]);
 
   return (
     <div className="min-h-screen pb-28 bg-[#fdfbf7]">
@@ -268,8 +270,29 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
 
       {/* Main Container */}
       <main className="max-w-3xl mx-auto px-4 pt-4 space-y-4">
-        {/* Search */}
-        <SearchBar value={searchQuery} onChange={setSearchQuery} />
+        {/* Search & Veg Filter Bar */}
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            <SearchBar value={searchQuery} onChange={setSearchQuery} />
+          </div>
+          <button
+            onClick={() => setIsVegOnly(!isVegOnly)}
+            className={`px-3 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center gap-1.5 shrink-0 border active:scale-95 ${
+              isVegOnly
+                ? 'bg-emerald-600 text-white border-emerald-500 shadow-md shadow-emerald-600/20'
+                : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'
+            }`}
+          >
+            <span
+              className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center p-[2px] ${
+                isVegOnly ? 'border-white' : 'border-emerald-600'
+              }`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${isVegOnly ? 'bg-white' : 'bg-emerald-600'}`} />
+            </span>
+            <span>Veg Only</span>
+          </button>
+        </div>
 
         {/* Categories Horizontal Tabs */}
         <CategoryTabs

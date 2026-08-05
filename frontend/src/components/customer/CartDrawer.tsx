@@ -64,19 +64,25 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
         onClick={onClose}
       />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-        <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col">
-          {/* Drawer Header */}
-          <div className="px-6 py-4 bg-stone-900 text-white flex items-center justify-between shadow-xs">
-            <div className="flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-amber-400" />
-              <div>
-                <h2 className="text-base font-bold">Your Order Cart</h2>
-                <p className="text-xs text-stone-400">
-                  {table.number} • {items.length} {items.length === 1 ? 'item' : 'items'}
-                </p>
-              </div>
+      <div className="fixed inset-x-0 bottom-0 max-h-[92vh] sm:inset-y-0 sm:right-0 sm:left-auto sm:h-full sm:max-w-md w-full bg-white rounded-t-[32px] sm:rounded-none shadow-2xl flex flex-col overflow-hidden animate-slideUp">
+        {/* Mobile Drag Handle */}
+        <div className="sm:hidden pt-3 pb-1 flex justify-center bg-stone-900">
+          <div className="w-12 h-1.5 bg-stone-700 rounded-full" />
+        </div>
+
+        {/* Drawer Header */}
+        <div className="px-6 py-4 bg-stone-900 text-white flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold">
+              <ShoppingBag className="w-5 h-5" />
             </div>
+            <div>
+              <h2 className="text-base font-black tracking-tight">Your Order Cart</h2>
+              <p className="text-xs text-stone-400 font-medium">
+                {table.number} • {items.length} {items.length === 1 ? 'item' : 'items'}
+              </p>
+            </div>
+          </div>
             <div className="flex items-center gap-2">
               {items.length > 0 && (
                 <button
@@ -279,6 +285,5 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
           )}
         </div>
       </div>
-    </div>
-  );
+    );
 };
