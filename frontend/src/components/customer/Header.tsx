@@ -1,14 +1,13 @@
 import React from 'react';
 import type { CafeInfo, TableInfo } from '../../types';
-import { Utensils, MapPin, ShieldCheck, Clock } from 'lucide-react';
+import { Utensils, MapPin } from 'lucide-react';
 
 interface HeaderProps {
   cafe: CafeInfo;
   table: TableInfo;
-  onStaffLogin?: () => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ cafe, table, onStaffLogin }) => {
+export const Header: React.FC<HeaderProps> = ({ cafe, table }) => {
   return (
     <header className="bg-stone-900/95 text-white backdrop-blur-md border-b border-stone-800 sticky top-0 z-30 shadow-md">
       <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">

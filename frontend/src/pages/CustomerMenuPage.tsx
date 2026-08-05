@@ -12,7 +12,6 @@ import { StickyCartBar } from '../components/customer/StickyCartBar';
 interface CustomerMenuPageProps {
   tableToken: string;
   onOrderPlaced: (orderToken: string) => void;
-  onStaffLogin?: () => void;
 }
 
 // Seamless Fallback Menu Dataset (Guarantees UI renders instantly even before DB seed)
@@ -141,7 +140,6 @@ const FALLBACK_PRODUCTS: Product[] = [
 export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
   tableToken,
   onOrderPlaced,
-  onStaffLogin,
 }) => {
   const [cafe, setCafe] = useState<CafeInfo>(FALLBACK_CAFE);
   const [table, setTable] = useState<TableInfo>(FALLBACK_TABLE);
@@ -266,7 +264,7 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
   return (
     <div className="min-h-screen pb-28 bg-[#fdfbf7]">
       {/* Header */}
-      <Header cafe={cafe} table={table} onStaffLogin={onStaffLogin} />
+      <Header cafe={cafe} table={table} />
 
       {/* Main Container */}
       <main className="max-w-3xl mx-auto px-4 pt-4 space-y-4">

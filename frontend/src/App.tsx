@@ -168,7 +168,6 @@ export const App: React.FC = () => {
         setOrderToken(token);
         navigateTo('customer_tracker', `/?order=${token}`);
       }}
-      onStaffLogin={() => navigateTo(currentUser ? (currentUser.role === 'KITCHEN' ? 'kitchen' : 'admin') : 'login')}
     />
   );
 };
