@@ -3,7 +3,7 @@ import type { TableInfo, CafeInfo } from '../../types';
 import { Modal } from '../common/Modal';
 import { Button } from '../common/Button';
 import { api } from '../../services/api';
-import { Printer, Download, ExternalLink } from 'lucide-react';
+import { Printer, ExternalLink } from 'lucide-react';
 
 interface QRPreviewModalProps {
   table: TableInfo | null;

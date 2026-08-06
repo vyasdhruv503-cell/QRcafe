@@ -90,10 +90,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   } | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Load tab data dynamically
   const loadTabData = async () => {
     setIsLoading(true);
+    setLoadError(null);
     try {
       if (currentTab === 'dashboard') {
         const res = await api.getDashboard();
@@ -122,8 +124,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         const res = await api.getSettings();
         setSettings(res);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error loading tab data:', err);
+      setLoadError(err?.message || 'Could not connect to the server. Please make sure the backend is running.');
     } finally {
       setIsLoading(false);
     }
@@ -263,6 +266,18 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         />
 
         <main className="p-8 flex-1 overflow-y-auto">
+          {/* Error Banner */}
+          {loadError && (
+            <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3">
+              <div className="w-8 h-8 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center shrink-0 font-black text-sm">!</div>
+              <div>
+                <p className="text-sm font-bold text-rose-800">Backend Connection Error</p>
+                <p className="text-xs text-rose-600 mt-0.5">{loadError}</p>
+              </div>
+              <button onClick={loadTabData} className="ml-auto text-xs font-bold text-rose-700 hover:text-rose-900 underline shrink-0">Retry</button>
+            </div>
+          )}
+
           {/* TAB 1: DASHBOARD */}
           {currentTab === 'dashboard' && dashboardData && (
             <div className="space-y-8">

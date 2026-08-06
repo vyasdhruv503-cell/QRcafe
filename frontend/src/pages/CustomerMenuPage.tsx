@@ -155,10 +155,12 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [menuError, setMenuError] = useState<string | null>(null);
 
   // Fetch menu data by QR table token
   const loadMenuData = async () => {
     setIsLoading(true);
+    setMenuError(null);
     try {
       const token = tableToken || 'tok_table01_demo';
       const data = await api.getMenu(token);
@@ -168,8 +170,9 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
         setCategories(data.categories);
         setProducts(data.products);
       }
-    } catch (err) {
-      console.warn('API connection check failed, displaying menu dataset:', err);
+    } catch (err: any) {
+      console.warn('API connection failed, using fallback menu:', err);
+      setMenuError('Backend se connect nahi ho pa raha. Fallback menu dikh raha hai — orders DB mein nahi jayenge.');
     } finally {
       setIsLoading(false);
     }
@@ -223,29 +226,22 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
     notes: string,
     paymentMethod: string
   ) => {
-    try {
-      const payload = {
-        tableToken: tableToken || 'tok_table01_demo',
-        customerName,
-        customerPhone,
-        notes,
-        paymentMethod,
-        items: cart.map((i) => ({
-          productId: i.product.id,
-          quantity: i.quantity,
-          specialNote: i.specialNote,
-        })),
-      };
+    const payload = {
+      tableToken: tableToken || 'tok_table01_demo',
+      customerName,
+      customerPhone,
+      notes,
+      paymentMethod,
+      items: cart.map((i) => ({
+        productId: i.product.id,
+        quantity: i.quantity,
+        specialNote: i.specialNote,
+      })),
+    };
 
-      const res = await api.placeOrder(payload);
-      setCart([]);
-      onOrderPlaced(res.order.orderToken);
-    } catch (err) {
-      // Fallback demo order token if backend server is offline
-      const mockOrderToken = 'ord_demo_' + Date.now();
-      setCart([]);
-      onOrderPlaced(mockOrderToken);
-    }
+    const res = await api.placeOrder(payload);
+    setCart([]);
+    onOrderPlaced(res.order.orderToken);
   };
 
   // Filter products by category, search, and veg preference
@@ -265,6 +261,14 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
     <div className="min-h-screen pb-28 bg-[#fdfbf7]">
       {/* Header */}
       <Header cafe={cafe} table={table} />
+
+      {/* Backend Warning Banner */}
+      {menuError && (
+        <div className="bg-rose-600 text-white text-xs font-bold px-4 py-2.5 flex items-center justify-between gap-3">
+          <span>⚠️ {menuError}</span>
+          <button onClick={loadMenuData} className="underline shrink-0">Retry</button>
+        </div>
+      )}
 
       {/* Main Container */}
       <main className="max-w-3xl mx-auto px-4 pt-4 space-y-4">

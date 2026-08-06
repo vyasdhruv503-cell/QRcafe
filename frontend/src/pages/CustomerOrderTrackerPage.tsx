@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import type { OrderRecord } from '../types';
 import { api } from '../services/api';
 import { StatusBadge } from '../components/common/StatusBadge';
-import { Button } from '../components/common/Button';
 import { CheckCircle2, Utensils, RefreshCw, ArrowLeft } from 'lucide-react';
 
 interface CustomerOrderTrackerPageProps {
@@ -48,7 +47,6 @@ export const CustomerOrderTrackerPage: React.FC<CustomerOrderTrackerPageProps> =
   onBackToMenu,
 }) => {
   const [order, setOrder] = useState<OrderRecord>(FALLBACK_ORDER);
-  const [isLoading, setIsLoading] = useState(false);
 
   const fetchOrderStatus = async () => {
     try {

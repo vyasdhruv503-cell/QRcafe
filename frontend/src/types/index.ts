@@ -86,6 +86,7 @@ export interface OrderRecord {
   tax: number;
   discount: number;
   total: number;
+  cafeName?: string;
   notes?: string;
   createdAt: string;
   elapsedMinutes?: number;

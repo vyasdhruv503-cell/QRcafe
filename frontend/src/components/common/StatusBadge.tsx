@@ -6,7 +6,7 @@ interface StatusBadgeProps {
   type?: 'order' | 'payment';
 }
 
-export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type = 'order' }) => {
+export const StatusBadge: React.FC<StatusBadgeProps> = ({ status, type: _type = 'order' }) => {
   const styles: Record<string, string> = {
     // Order Statuses
     PENDING: 'bg-amber-100 text-amber-800 border-amber-200',

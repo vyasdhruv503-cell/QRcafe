@@ -57,7 +57,7 @@ export const App: React.FC = () => {
         .getMe()
         .then((res) => {
           setCurrentUser(res.user);
-          if (path.includes('/kitchen')) {
+          if (res.user.role === 'KITCHEN') {
             setView('kitchen');
           } else {
             setView('admin');

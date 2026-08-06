@@ -63,8 +63,9 @@ async function main() {
   const tableNumbers = ['Table 01', 'Table 02', 'Table 03', 'Table 04', 'Table 05', 'Table 06'];
   const tables = [];
 
-  for (const num of tableNumbers) {
-    const qrToken = `tok_${crypto.randomBytes(12).toString('hex')}`;
+  for (let i = 0; i < tableNumbers.length; i++) {
+    const num = tableNumbers[i];
+    const qrToken = i === 0 ? 'tok_table01_demo' : `tok_${crypto.randomBytes(12).toString('hex')}`;
     const table = await prisma.cafeTable.create({
       data: {
         cafeId: cafe.id,

@@ -6,8 +6,18 @@ const API_BASE_URL =
     : `${window.location.origin}/api`;
 
 async function ensureAuthToken(role: 'KITCHEN' | 'ADMIN' = 'KITCHEN'): Promise<string | null> {
-  let token = localStorage.getItem('cafeqr_token');
-  if (token) return token;
+  const token = localStorage.getItem('cafeqr_token');
+  const userStr = localStorage.getItem('cafeqr_user');
+
+  // Only reuse saved token if it belongs to the correct role
+  if (token && userStr) {
+    try {
+      const savedUser = JSON.parse(userStr);
+      if (savedUser.role === role) return token;
+    } catch {
+      // Malformed stored user — fall through to re-auth
+    }
+  }
 
   try {
     const email = role === 'ADMIN' ? 'admin@cafeqr.com' : 'kitchen@cafeqr.com';
@@ -172,36 +182,8 @@ export const api = {
         body: JSON.stringify(payload),
       });
       return await handleResponse(res);
-    } catch (err) {
-      const mockOrderToken = 'ord_tok_' + Date.now();
-      const newOrder: OrderRecord = {
-        id: 'ord_' + Date.now(),
-        orderNumber: MOCK_ORDERS.length + 107,
-        orderToken: mockOrderToken,
-        tableNumber: 'Table 01',
-        customerName: payload.customerName || 'Guest Customer',
-        customerPhone: payload.customerPhone,
-        orderStatus: 'PENDING',
-        paymentStatus: 'PENDING',
-        paymentMethod: payload.paymentMethod as any,
-        subtotal: 398.0,
-        tax: 19.9,
-        discount: 0,
-        total: 417.9,
-        notes: payload.notes,
-        createdAt: new Date().toISOString(),
-        elapsedMinutes: 0,
-        items: payload.items.map((item, idx) => ({
-          id: 'item_' + idx,
-          productName: MOCK_PRODUCTS.find((p) => p.id === item.productId)?.name || 'Food Item',
-          price: 200,
-          quantity: item.quantity,
-          subtotal: 200 * item.quantity,
-          specialNote: item.specialNote,
-        })),
-      };
-      MOCK_ORDERS.unshift(newOrder);
-      return { message: 'Order placed successfully!', order: newOrder };
+    } catch (err: any) {
+      throw new Error(err?.message || 'Order nahi ho saka. Backend server check karein.');
     }
   },
 
@@ -268,34 +250,7 @@ export const api = {
       const res = await fetch(`${API_BASE_URL}/admin/dashboard`, { headers });
       return await handleResponse(res);
     } catch (err) {
-      return {
-        metrics: {
-          todaySales: 14850.0,
-          todayOrders: 48,
-          totalOrders: 142,
-          pendingOrders: 3,
-          preparingOrders: 5,
-          completedOrders: 38,
-          totalProducts: 21,
-          totalTables: 6,
-        },
-        salesTrend: [
-          { date: 'Mon', sales: 12400, orders: 38 },
-          { date: 'Tue', sales: 14200, orders: 42 },
-          { date: 'Wed', sales: 11800, orders: 35 },
-          { date: 'Thu', sales: 16500, orders: 50 },
-          { date: 'Fri', sales: 18900, orders: 58 },
-          { date: 'Sat', sales: 22400, orders: 68 },
-          { date: 'Sun', sales: 14850, orders: 48 },
-        ],
-        popularProducts: [
-          { name: 'Margherita Supreme', quantity: 24, revenue: 8376.0 },
-          { name: 'Classic Smash Cheeseburger', quantity: 18, revenue: 5202.0 },
-          { name: 'Iced Vanilla Bean Latte', quantity: 32, revenue: 4768.0 },
-          { name: 'Truffle Parmesan Loaded Fries', quantity: 15, revenue: 2835.0 },
-          { name: 'Molten Belgian Lava Cake', quantity: 12, revenue: 2628.0 },
-        ],
-      };
+      throw err;
     }
   },
 
@@ -305,7 +260,7 @@ export const api = {
       const res = await fetch(`${API_BASE_URL}/admin/products`, { headers });
       return await handleResponse(res);
     } catch (err) {
-      return MOCK_PRODUCTS;
+      throw err;
     }
   },
 
@@ -318,20 +273,7 @@ export const api = {
       });
       return await handleResponse(res);
     } catch (err) {
-      const newProd: Product = {
-        id: 'prod_' + Date.now(),
-        categoryId: data.categoryId || 'cat_1',
-        name: data.name || 'New Item',
-        description: data.description,
-        price: data.price || 199,
-        image: data.image,
-        isVeg: data.isVeg ?? true,
-        isFeatured: data.isFeatured ?? false,
-        isAvailable: data.isAvailable ?? true,
-        preparationTime: data.preparationTime || 15,
-      };
-      MOCK_PRODUCTS.unshift(newProd);
-      return newProd;
+      throw err;
     }
   },
 
@@ -344,9 +286,7 @@ export const api = {
       });
       return await handleResponse(res);
     } catch (err) {
-      const existing = MOCK_PRODUCTS.find((p) => p.id === id);
-      if (existing) Object.assign(existing, data);
-      return existing || MOCK_PRODUCTS[0];
+      throw err;
     }
   },
 
@@ -358,9 +298,7 @@ export const api = {
       });
       return await handleResponse(res);
     } catch (err) {
-      const existing = MOCK_PRODUCTS.find((p) => p.id === id);
-      if (existing) existing.isAvailable = !existing.isAvailable;
-      return existing || MOCK_PRODUCTS[0];
+      throw err;
     }
   },
 
@@ -372,9 +310,7 @@ export const api = {
       });
       return await handleResponse(res);
     } catch (err) {
-      const idx = MOCK_PRODUCTS.findIndex((p) => p.id === id);
-      if (idx !== -1) MOCK_PRODUCTS.splice(idx, 1);
-      return { message: 'Product deleted' };
+      throw err;
     }
   },
 
@@ -384,7 +320,7 @@ export const api = {
       const res = await fetch(`${API_BASE_URL}/admin/categories`, { headers: await getAuthHeaders('ADMIN') });
       return await handleResponse(res);
     } catch (err) {
-      return MOCK_CATEGORIES;
+      throw err;
     }
   },
 
@@ -397,16 +333,7 @@ export const api = {
       });
       return await handleResponse(res);
     } catch (err) {
-      const newCat: Category = {
-        id: 'cat_' + Date.now(),
-        name: data.name || 'New Category',
-        description: data.description,
-        sortOrder: data.sortOrder || 0,
-        productCount: 0,
-        isActive: true,
-      };
-      MOCK_CATEGORIES.push(newCat);
-      return newCat;
+      throw err;
     }
   },
 
@@ -419,9 +346,7 @@ export const api = {
       });
       return await handleResponse(res);
     } catch (err) {
-      const existing = MOCK_CATEGORIES.find((c) => c.id === id);
-      if (existing) Object.assign(existing, data);
-      return existing || MOCK_CATEGORIES[0];
+      throw err;
     }
   },
 
@@ -433,9 +358,7 @@ export const api = {
       });
       return await handleResponse(res);
     } catch (err) {
-      const idx = MOCK_CATEGORIES.findIndex((c) => c.id === id);
-      if (idx !== -1) MOCK_CATEGORIES.splice(idx, 1);
-      return { message: 'Category deleted' };
+      throw err;
     }
   },
 
@@ -445,7 +368,7 @@ export const api = {
       const res = await fetch(`${API_BASE_URL}/admin/tables`, { headers: await getAuthHeaders('ADMIN') });
       return await handleResponse(res);
     } catch (err) {
-      return MOCK_TABLES;
+      throw err;
     }
   },
 
@@ -458,15 +381,7 @@ export const api = {
       });
       return await handleResponse(res);
     } catch (err) {
-      const newTbl: TableInfo = {
-        id: 'tbl_' + Date.now(),
-        number,
-        capacity,
-        qrToken: 'tok_' + Date.now(),
-        isActive: true,
-      };
-      MOCK_TABLES.push(newTbl);
-      return newTbl;
+      throw err;
     }
   },
 
@@ -478,9 +393,7 @@ export const api = {
       });
       return await handleResponse(res);
     } catch (err) {
-      const tbl = MOCK_TABLES.find((t) => t.id === tableId);
-      if (tbl) tbl.qrToken = 'tok_' + Date.now();
-      return tbl || MOCK_TABLES[0];
+      throw err;
     }
   },
 
@@ -508,14 +421,7 @@ export const api = {
       const res = await fetch(`${API_BASE_URL}/admin/orders?${params.toString()}`, { headers });
       return await handleResponse(res);
     } catch (err) {
-      let filtered = MOCK_ORDERS;
-      if (status && status !== 'ALL') {
-        filtered = filtered.filter((o) => o.orderStatus === status);
-      }
-      if (date) {
-        filtered = filtered.filter((o) => o.createdAt.startsWith(date));
-      }
-      return filtered;
+      throw err;
     }
   },
 
@@ -528,12 +434,7 @@ export const api = {
       });
       return await handleResponse(res);
     } catch (err) {
-      const ord = MOCK_ORDERS.find((o) => o.id === id);
-      if (ord) {
-        ord.orderStatus = orderStatus as any;
-        if (paymentStatus) ord.paymentStatus = paymentStatus as any;
-      }
-      return ord || MOCK_ORDERS[0];
+      throw err;
     }
   },
 
@@ -547,7 +448,7 @@ export const api = {
       }
       return MOCK_STAFF;
     } catch (err) {
-      return MOCK_STAFF;
+      throw err;
     }
   },
 
@@ -562,19 +463,7 @@ export const api = {
       MOCK_STAFF.unshift(newStaff);
       return newStaff;
     } catch (err) {
-      const fallbackStaff: AuthUser = {
-        id: 'usr_' + Date.now(),
-        staffId: `STF-${(101 + MOCK_STAFF.length).toString().padStart(3, '0')}`,
-        name: data.name,
-        email: data.email,
-        role: data.role as any,
-        cafeId: 'cafe_1',
-        cafeName: 'My Cafe',
-        currency: '₹',
-        createdAt: new Date().toISOString(),
-      };
-      MOCK_STAFF.unshift(fallbackStaff);
-      return fallbackStaff;
+      throw err;
     }
   },
 
@@ -588,8 +477,7 @@ export const api = {
       MOCK_STAFF = MOCK_STAFF.filter((s) => s.id !== id);
       return result;
     } catch (err) {
-      MOCK_STAFF = MOCK_STAFF.filter((s) => s.id !== id);
-      return { message: 'Staff account deleted' };
+      throw err;
     }
   },
 
@@ -599,7 +487,7 @@ export const api = {
       const res = await fetch(`${API_BASE_URL}/admin/settings`, { headers: await getAuthHeaders('ADMIN') });
       return await handleResponse(res);
     } catch (err) {
-      return MOCK_CAFE;
+      throw err;
     }
   },
 
@@ -612,8 +500,7 @@ export const api = {
       });
       return await handleResponse(res);
     } catch (err) {
-      Object.assign(MOCK_CAFE, data);
-      return MOCK_CAFE;
+      throw err;
     }
   },
 
@@ -624,7 +511,7 @@ export const api = {
       const res = await fetch(`${API_BASE_URL}/kitchen/orders`, { headers });
       return await handleResponse(res);
     } catch (err) {
-      return MOCK_ORDERS.filter((o) => ['PENDING', 'ACCEPTED', 'PREPARING', 'READY'].includes(o.orderStatus));
+      throw err;
     }
   },
 
@@ -638,9 +525,7 @@ export const api = {
       });
       return await handleResponse(res);
     } catch (err) {
-      const ord = MOCK_ORDERS.find((o) => o.id === id);
-      if (ord) ord.orderStatus = nextStatus as any;
-      return ord || MOCK_ORDERS[0];
+      throw err;
     }
   },
 };
