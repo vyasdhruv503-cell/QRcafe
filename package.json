@@ -13,7 +13,7 @@
     "build:all": "npm run build:backend && npm run build:frontend",
     "build": "npm run render-build",
     "start": "cd backend && npm start",
-    "render-build": "npm run install:all && npm run prisma:generate && npm run prisma:push && npm run prisma:seed && npm run build:all",
+    "render-build": "npm run install:all && node prisma/deploy.js && npm run build:all",
     "prisma:generate": "cd backend && npx prisma generate --schema=../prisma/schema.prisma",
     "prisma:push": "cd backend && npx prisma db push --schema=../prisma/schema.prisma",
     "prisma:seed": "node prisma/seed.js",
