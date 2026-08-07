@@ -120,7 +120,15 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
       },
     });
 
-    if (dbProducts.length !== productIds.length) {
+    console.log('[EXPRESS DEBUG createOrder]:', {
+      tableToken: validatedData.tableToken,
+      tableFound: !!table,
+      tableCafeId: table?.cafeId,
+      productIds,
+      dbProducts,
+    });
+    const uniqueProductIds = new Set(productIds);
+    if (dbProducts.length !== uniqueProductIds.size) {
       return res.status(400).json({ error: 'One or more items in your cart are unavailable or invalid.' });
     }
 

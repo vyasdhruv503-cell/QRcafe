@@ -102,48 +102,70 @@ let MOCK_STAFF: AuthUser[] = [
   { id: 'usr_2', staffId: 'STF-102', name: 'Head Chef', email: 'kitchen@cafeqr.com', role: 'KITCHEN', cafeId: 'cafe_1', cafeName: 'My Cafe', currency: '₹', createdAt: new Date().toISOString() },
 ];
 
-let MOCK_ORDERS: OrderRecord[] = [
-  {
-    id: 'ord_105',
-    orderNumber: 105,
-    orderToken: 'ord_tok_105',
-    tableNumber: 'Table 04',
-    customerName: 'Guest Customer',
-    orderStatus: 'PREPARING',
-    paymentStatus: 'PENDING',
-    paymentMethod: 'PAY_AT_COUNTER',
-    subtotal: 398.0,
-    tax: 19.9,
-    discount: 0,
-    total: 417.9,
-    createdAt: new Date(Date.now() - 6 * 60000).toISOString(),
-    elapsedMinutes: 6,
-    items: [
-      { id: 'i1', productName: 'Classic Smash Cheeseburger', price: 289.0, quantity: 1, subtotal: 289.0 },
-      { id: 'i2', productName: 'Iced Vanilla Bean Latte', price: 149.0, quantity: 1, subtotal: 149.0 },
-    ],
-  },
-  {
-    id: 'ord_106',
-    orderNumber: 106,
-    orderToken: 'ord_tok_106',
-    tableNumber: 'Table 01',
-    customerName: 'Priya Sharma',
-    orderStatus: 'PENDING',
-    paymentStatus: 'PENDING',
-    paymentMethod: 'CASH',
-    subtotal: 538.0,
-    tax: 26.9,
-    discount: 0,
-    total: 564.9,
-    createdAt: new Date(Date.now() - 2 * 60000).toISOString(),
-    elapsedMinutes: 2,
-    items: [
-      { id: 'i3', productName: 'Margherita Supreme', price: 349.0, quantity: 1, subtotal: 349.0 },
-      { id: 'i4', productName: 'Truffle Parmesan Loaded Fries', price: 189.0, quantity: 1, subtotal: 189.0 },
-    ],
-  },
-];
+const loadInitialMockOrders = (): OrderRecord[] => {
+  const initial: OrderRecord[] = [
+    {
+      id: 'ord_105',
+      orderNumber: 105,
+      orderToken: 'ord_tok_105',
+      tableNumber: 'Table 04',
+      customerName: 'Guest Customer',
+      orderStatus: 'PREPARING',
+      paymentStatus: 'PENDING',
+      paymentMethod: 'PAY_AT_COUNTER',
+      subtotal: 398.0,
+      tax: 19.9,
+      discount: 0,
+      total: 417.9,
+      createdAt: new Date(Date.now() - 6 * 60000).toISOString(),
+      elapsedMinutes: 6,
+      items: [
+        { id: 'i1', productName: 'Classic Smash Cheeseburger', price: 289.0, quantity: 1, subtotal: 289.0 },
+        { id: 'i2', productName: 'Iced Vanilla Bean Latte', price: 149.0, quantity: 1, subtotal: 149.0 },
+      ],
+    },
+    {
+      id: 'ord_106',
+      orderNumber: 106,
+      orderToken: 'ord_tok_106',
+      tableNumber: 'Table 01',
+      customerName: 'Priya Sharma',
+      orderStatus: 'PENDING',
+      paymentStatus: 'PENDING',
+      paymentMethod: 'CASH',
+      subtotal: 538.0,
+      tax: 26.9,
+      discount: 0,
+      total: 564.9,
+      createdAt: new Date(Date.now() - 2 * 60000).toISOString(),
+      elapsedMinutes: 2,
+      items: [
+        { id: 'i3', productName: 'Margherita Supreme', price: 349.0, quantity: 1, subtotal: 349.0 },
+        { id: 'i4', productName: 'Truffle Parmesan Loaded Fries', price: 189.0, quantity: 1, subtotal: 189.0 },
+      ],
+    },
+  ];
+
+  try {
+    const storedObj = JSON.parse(localStorage.getItem('cafeqr_customer_orders_data') || '{}');
+    const storedList = Object.values(storedObj) as OrderRecord[];
+    if (storedList.length > 0) {
+      const map = new Map<string, OrderRecord>();
+      storedList.forEach((o) => {
+        if (o && (o.orderToken || o.id)) map.set(o.orderToken || o.id, o);
+      });
+      initial.forEach((o) => {
+        if (!map.has(o.orderToken || o.id)) map.set(o.orderToken || o.id, o);
+      });
+      return Array.from(map.values());
+    }
+  } catch (e) {
+    // Ignore error
+  }
+  return initial;
+};
+
+let MOCK_ORDERS: OrderRecord[] = loadInitialMockOrders();
 
 export const api = {
   // --- Public Guest Customer API ---
@@ -200,6 +222,7 @@ export const api = {
       });
       const data = await handleResponse<{ message: string; order: OrderRecord }>(res);
       saveToLocalStorage(data.order.orderToken, data.order);
+      MOCK_ORDERS = [data.order, ...MOCK_ORDERS.filter((o) => o.orderToken !== data.order.orderToken)];
       return data;
     } catch (err: any) {
       console.warn('Backend order placement failed/offline. Using fallback order handler:', err);
@@ -255,28 +278,53 @@ export const api = {
   async trackOrder(orderToken: string): Promise<OrderRecord> {
     try {
       const res = await fetch(`${API_BASE_URL}/public/orders/${orderToken}`);
-      return await handleResponse(res);
+      if (res.ok) {
+        const data = await res.json();
+        const storedOrdersObj = JSON.parse(localStorage.getItem('cafeqr_customer_orders_data') || '{}');
+        storedOrdersObj[orderToken] = data;
+        localStorage.setItem('cafeqr_customer_orders_data', JSON.stringify(storedOrdersObj));
+        return data;
+      }
+      throw new Error('Order not found on server');
     } catch (err) {
       const storedOrdersObj = JSON.parse(localStorage.getItem('cafeqr_customer_orders_data') || '{}');
       if (storedOrdersObj[orderToken]) {
         return storedOrdersObj[orderToken];
       }
       const found = MOCK_ORDERS.find((o) => o.orderToken === orderToken);
-      return found || MOCK_ORDERS[0];
+      if (found) return found;
+      throw err;
     }
   },
 
   async getCustomerOrderHistory(): Promise<OrderRecord[]> {
     try {
       const storedTokens: string[] = JSON.parse(localStorage.getItem('cafeqr_customer_orders') || '[]');
-      if (storedTokens.length === 0) return [];
+      const storedOrdersObj: Record<string, OrderRecord> = JSON.parse(localStorage.getItem('cafeqr_customer_orders_data') || '{}');
 
-      const orderPromises = storedTokens.map((token) => this.trackOrder(token).catch(() => null));
-      const results = await Promise.all(orderPromises);
-      return results.filter((o): o is OrderRecord => o !== null);
+      const orderPromises = storedTokens.map(async (token) => {
+        try {
+          return await this.trackOrder(token);
+        } catch {
+          return storedOrdersObj[token] || null;
+        }
+      });
+
+      const fetchedOrders = (await Promise.all(orderPromises)).filter((o): o is OrderRecord => o !== null);
+      const localStoredOrders = Object.values(storedOrdersObj);
+
+      const orderMap = new Map<string, OrderRecord>();
+      [...fetchedOrders, ...localStoredOrders, ...MOCK_ORDERS].forEach((ord) => {
+        if (ord && (ord.orderToken || ord.id)) {
+          orderMap.set(ord.orderToken || ord.id, ord);
+        }
+      });
+
+      const historyList = Array.from(orderMap.values());
+      return historyList.length > 0 ? historyList : MOCK_ORDERS;
     } catch (e) {
       console.warn('Error fetching customer order history:', e);
-      return [];
+      return MOCK_ORDERS;
     }
   },
 
@@ -496,15 +544,25 @@ export const api = {
   async getAdminOrders(status?: string, search?: string, date?: string): Promise<OrderRecord[]> {
     try {
       const params = new URLSearchParams();
-      if (status) params.append('status', status);
+      if (status && status !== 'ALL') params.append('status', status);
       if (search) params.append('search', search);
       if (date) params.append('date', date);
 
       const headers = await getAuthHeaders('ADMIN');
       const res = await fetch(`${API_BASE_URL}/admin/orders?${params.toString()}`, { headers });
-      return await handleResponse(res);
+      const apiOrders = await handleResponse<OrderRecord[]>(res);
+      
+      const orderMap = new Map<string, OrderRecord>();
+      (Array.isArray(apiOrders) ? apiOrders : []).forEach((o) => orderMap.set(o.id || o.orderToken, o));
+      MOCK_ORDERS.forEach((o) => {
+        if (!orderMap.has(o.id) && !orderMap.has(o.orderToken)) {
+          orderMap.set(o.orderToken || o.id, o);
+        }
+      });
+      return Array.from(orderMap.values());
     } catch (err) {
-      throw err;
+      console.warn('Admin orders endpoint failed, returning local orders:', err);
+      return MOCK_ORDERS;
     }
   },
 
@@ -515,8 +573,19 @@ export const api = {
         headers: await getAuthHeaders('ADMIN'),
         body: JSON.stringify({ orderStatus, paymentStatus }),
       });
-      return await handleResponse(res);
+      const updated = await handleResponse<OrderRecord>(res);
+      const idx = MOCK_ORDERS.findIndex((o) => o.id === id || o.orderToken === id);
+      if (idx !== -1) {
+        MOCK_ORDERS[idx] = { ...MOCK_ORDERS[idx], ...updated };
+      }
+      return updated;
     } catch (err) {
+      const idx = MOCK_ORDERS.findIndex((o) => o.id === id || o.orderToken === id);
+      if (idx !== -1) {
+        MOCK_ORDERS[idx].orderStatus = orderStatus as any;
+        if (paymentStatus) MOCK_ORDERS[idx].paymentStatus = paymentStatus as any;
+        return MOCK_ORDERS[idx];
+      }
       throw err;
     }
   },
@@ -531,7 +600,7 @@ export const api = {
       }
       return MOCK_STAFF;
     } catch (err) {
-      throw err;
+      return MOCK_STAFF;
     }
   },
 
@@ -570,7 +639,7 @@ export const api = {
       const res = await fetch(`${API_BASE_URL}/admin/settings`, { headers: await getAuthHeaders('ADMIN') });
       return await handleResponse(res);
     } catch (err) {
-      throw err;
+      return MOCK_CAFE;
     }
   },
 
@@ -592,9 +661,19 @@ export const api = {
     try {
       const headers = await getAuthHeaders('KITCHEN');
       const res = await fetch(`${API_BASE_URL}/kitchen/orders`, { headers });
-      return await handleResponse(res);
+      const apiOrders = await handleResponse<OrderRecord[]>(res);
+
+      const orderMap = new Map<string, OrderRecord>();
+      (Array.isArray(apiOrders) ? apiOrders : []).forEach((o) => orderMap.set(o.id || o.orderToken, o));
+      MOCK_ORDERS.forEach((o) => {
+        if (!orderMap.has(o.id) && !orderMap.has(o.orderToken)) {
+          orderMap.set(o.orderToken || o.id, o);
+        }
+      });
+      return Array.from(orderMap.values());
     } catch (err) {
-      throw err;
+      console.warn('Kitchen orders endpoint failed, returning local orders:', err);
+      return MOCK_ORDERS;
     }
   },
 

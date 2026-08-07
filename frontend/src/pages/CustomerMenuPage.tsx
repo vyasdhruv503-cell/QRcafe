@@ -254,6 +254,7 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
 
     const res = await api.placeOrder(payload);
     setCart([]);
+    await loadOrderHistory();
     onOrderPlaced(res.order.orderToken);
   };
 
