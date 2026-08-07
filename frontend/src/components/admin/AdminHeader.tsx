@@ -1,6 +1,6 @@
 import React from 'react';
 import type { AuthUser } from '../../types';
-import { Store, ChefHat, ExternalLink } from 'lucide-react';
+import { Store, ChefHat, ExternalLink, Menu } from 'lucide-react';
 import { Button } from '../common/Button';
 
 interface AdminHeaderProps {
@@ -8,6 +8,7 @@ interface AdminHeaderProps {
   user: AuthUser | null;
   onNavigateToKitchen?: () => void;
   onNavigateToMenu?: () => void;
+  onOpenSidebar?: () => void;
 }
 
 export const AdminHeader: React.FC<AdminHeaderProps> = ({
@@ -15,25 +16,48 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
   user,
   onNavigateToKitchen,
   onNavigateToMenu,
+  onOpenSidebar,
 }) => {
   return (
-    <header className="bg-white border-b border-stone-200 px-8 py-4 flex items-center justify-between sticky top-0 z-20 shadow-2xs">
-      <div>
-        <h1 className="text-xl font-extrabold text-stone-900">{title}</h1>
-        <p className="text-xs text-stone-500 mt-0.5">Manage your cafe operations and real-time orders</p>
+    <header className="bg-white border-b border-stone-200 px-4 sm:px-8 py-3 sm:py-4 flex items-center justify-between sticky top-0 z-20 shadow-2xs gap-3">
+      <div className="flex items-center gap-3 min-w-0">
+        {/* Hamburger menu button for mobile */}
+        <button
+          onClick={onOpenSidebar}
+          className="lg:hidden p-2 text-stone-600 hover:bg-stone-100 rounded-xl transition-colors shrink-0"
+          aria-label="Open menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+        <div className="min-w-0">
+          <h1 className="text-base sm:text-xl font-extrabold text-stone-900 truncate">{title}</h1>
+          <p className="hidden sm:block text-xs text-stone-500 mt-0.5">Manage your cafe operations and real-time orders</p>
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 shrink-0">
         {onNavigateToKitchen && (
           <Button
             variant="secondary"
             size="sm"
             onClick={onNavigateToKitchen}
-            className="flex items-center gap-1.5 text-xs bg-amber-50 border border-amber-200 text-amber-900 hover:bg-amber-100 font-bold"
+            className="hidden sm:flex items-center gap-1.5 text-xs bg-amber-50 border border-amber-200 text-amber-900 hover:bg-amber-100 font-bold"
           >
             <ChefHat className="w-4 h-4 text-amber-600" />
-            Kitchen KDS
+            <span className="hidden md:inline">Kitchen KDS</span>
+            <span className="md:hidden">Kitchen</span>
           </Button>
+        )}
+
+        {/* Mobile kitchen icon-only button */}
+        {onNavigateToKitchen && (
+          <button
+            onClick={onNavigateToKitchen}
+            className="sm:hidden p-2 bg-amber-50 border border-amber-200 text-amber-900 hover:bg-amber-100 rounded-xl transition-colors"
+            title="Kitchen KDS"
+          >
+            <ChefHat className="w-4 h-4 text-amber-600" />
+          </button>
         )}
 
         {onNavigateToMenu && (
@@ -41,14 +65,15 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
             variant="outline"
             size="sm"
             onClick={onNavigateToMenu}
-            className="flex items-center gap-1.5 text-xs font-semibold"
+            className="hidden sm:flex items-center gap-1.5 text-xs font-semibold"
           >
             <ExternalLink className="w-3.5 h-3.5 text-stone-500" />
-            Customer Menu
+            <span className="hidden md:inline">Customer Menu</span>
+            <span className="md:hidden">Menu</span>
           </Button>
         )}
 
-        <div className="flex items-center gap-2 bg-stone-100 text-stone-800 border border-stone-200 px-3.5 py-1.5 rounded-xl text-xs font-semibold">
+        <div className="hidden sm:flex items-center gap-2 bg-stone-100 text-stone-800 border border-stone-200 px-3.5 py-1.5 rounded-xl text-xs font-semibold">
           <Store className="w-4 h-4 text-amber-600" />
           <span>{user?.cafeName || 'My Cafe'}</span>
         </div>

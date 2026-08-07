@@ -10,6 +10,7 @@ import {
   Users,
   Settings,
   LogOut,
+  X,
 } from 'lucide-react';
 import type { AuthUser } from '../../types';
 
@@ -18,6 +19,8 @@ interface SidebarProps {
   onSelectTab: (tab: string) => void;
   user: AuthUser | null;
   onLogout: () => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -25,6 +28,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectTab,
   user,
   onLogout,
+  isOpen = false,
+  onClose,
 }) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -38,17 +43,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
     ...(user?.role === 'ADMIN' ? [{ id: 'settings', label: 'Cafe Settings', icon: Settings }] : []),
   ];
 
-  return (
-    <aside className="w-64 bg-stone-900 text-stone-300 flex flex-col h-screen sticky top-0 shrink-0 border-r border-stone-800">
+  const handleSelect = (id: string) => {
+    onSelectTab(id);
+    onClose?.();
+  };
+
+  const sidebarContent = (
+    <aside className="w-64 bg-stone-900 text-stone-300 flex flex-col h-full border-r border-stone-800">
       {/* Brand Header */}
-      <div className="p-6 border-b border-stone-800 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-amber-600 flex items-center justify-center text-white font-extrabold shadow-md">
-          <QrCode className="w-6 h-6" />
+      <div className="p-6 border-b border-stone-800 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-600 flex items-center justify-center text-white font-extrabold shadow-md shrink-0">
+            <QrCode className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-base font-extrabold text-white tracking-wide">CafeQR</h1>
+            <p className="text-[11px] text-amber-500 font-medium">Smart Digital Menu</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-base font-extrabold text-white tracking-wide">CafeQR</h1>
-          <p className="text-[11px] text-amber-500 font-medium">Smart Digital Menu</p>
-        </div>
+        {/* Close button for mobile */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="lg:hidden p-1.5 text-stone-400 hover:text-white hover:bg-stone-800 rounded-lg transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Navigation Menu */}
@@ -59,7 +80,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           return (
             <button
               key={item.id}
-              onClick={() => onSelectTab(item.id)}
+              onClick={() => handleSelect(item.id)}
               className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold transition-all ${
                 isActive
                   ? 'bg-amber-600 text-white shadow-sm font-bold'
@@ -90,5 +111,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
     </aside>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar - always visible */}
+      <div className="hidden lg:flex lg:flex-col lg:w-64 shrink-0 h-screen sticky top-0">
+        {sidebarContent}
+      </div>
+
+      {/* Mobile sidebar - drawer overlay */}
+      {isOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={onClose}
+          />
+          {/* Drawer */}
+          <div className="relative z-10 h-full">
+            {sidebarContent}
+          </div>
+        </div>
+      )}
+    </>
   );
 };

@@ -52,6 +52,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   onNavigateToMenu,
 }) => {
   const [currentTab, setCurrentTab] = useState('dashboard');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [dashboardData, setDashboardData] = useState<any>(null);
 
   // Management State
@@ -252,6 +253,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         onSelectTab={setCurrentTab}
         user={user}
         onLogout={onLogout}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
 
       {/* Main Content Area */}
@@ -263,9 +266,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           user={user}
           onNavigateToKitchen={onNavigateToKitchen}
           onNavigateToMenu={onNavigateToMenu}
+          onOpenSidebar={() => setIsSidebarOpen(true)}
         />
 
-        <main className="p-8 flex-1 overflow-y-auto">
+        <main className="p-4 sm:p-6 lg:p-8 flex-1 overflow-y-auto">
           {/* Error Banner */}
           {loadError && (
             <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3">
@@ -378,7 +382,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           {/* TAB 2: PRODUCTS */}
           {currentTab === 'products' && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <h2 className="text-base font-bold text-stone-800">Menu Products List</h2>
                 <Button
                   variant="primary"
@@ -388,12 +392,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   }}
                 >
                   <Plus className="w-4 h-4 mr-1.5" />
-                  Add New Product
+                  <span className="hidden sm:inline">Add New Product</span>
+                  <span className="sm:hidden">Add</span>
                 </Button>
               </div>
 
               <div className="bg-white rounded-3xl border border-stone-200 shadow-2xs overflow-hidden">
-                <table className="w-full text-left text-xs text-stone-700">
+                <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-stone-700 min-w-[640px]">
                   <thead className="bg-stone-50 border-b border-stone-200 uppercase font-bold text-stone-500">
                     <tr>
                       <th className="p-4">Item</th>
@@ -412,7 +418,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                             <img
                               src={p.image}
                               alt={p.name}
-                              className="w-10 h-10 rounded-xl object-cover"
+                              className="w-10 h-10 rounded-xl object-cover shrink-0"
                             />
                           )}
                           <div>
@@ -424,10 +430,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                             )}
                           </div>
                         </td>
-                        <td className="p-4 font-semibold text-stone-600">
+                        <td className="p-4 font-semibold text-stone-600 whitespace-nowrap">
                           {p.categoryName || 'Unassigned'}
                         </td>
-                        <td className="p-4 font-extrabold text-stone-900">₹{p.price.toFixed(2)}</td>
+                        <td className="p-4 font-extrabold text-stone-900 whitespace-nowrap">₹{p.price.toFixed(2)}</td>
                         <td className="p-4">
                           <span
                             className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${p.isVeg ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
@@ -442,7 +448,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                               await api.toggleProduct(p.id);
                               loadTabData();
                             }}
-                            className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${p.isAvailable
+                            className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${p.isAvailable
                               ? 'bg-emerald-100 text-emerald-800'
                               : 'bg-stone-200 text-stone-600'
                               }`}
@@ -451,7 +457,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                             {p.isAvailable ? 'Available' : 'Disabled'}
                           </button>
                         </td>
-                        <td className="p-4 text-right space-x-2">
+                        <td className="p-4 text-right space-x-2 whitespace-nowrap">
                           <button
                             onClick={() => {
                               setEditingProduct(p);
@@ -474,6 +480,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           )}
@@ -481,7 +488,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           {/* TAB 3: CATEGORIES */}
           {currentTab === 'categories' && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <h2 className="text-base font-bold text-stone-800">Menu Categories</h2>
                 <Button
                   variant="primary"
@@ -491,11 +498,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   }}
                 >
                   <Plus className="w-4 h-4 mr-1.5" />
-                  Add Category
+                  <span className="hidden sm:inline">Add Category</span>
+                  <span className="sm:hidden">Add</span>
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {categories.map((c) => (
                   <div
                     key={c.id}
@@ -547,15 +555,16 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           {/* TAB 4: TABLES & QR CODES */}
           {currentTab === 'tables' && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <h2 className="text-base font-bold text-stone-800">Cafe Seating Tables</h2>
                 <Button variant="primary" onClick={() => setIsTableModalOpen(true)}>
                   <Plus className="w-4 h-4 mr-1.5" />
-                  Add Seating Table
+                  <span className="hidden sm:inline">Add Seating Table</span>
+                  <span className="sm:hidden">Add</span>
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {tables.map((t) => (
                   <div
                     key={t.id}
@@ -610,7 +619,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           {(currentTab === 'orders' || currentTab === 'history') && (
             <div className="space-y-6">
               {/* Header & Date Filter Toolbar */}
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-5 rounded-3xl border border-stone-200 shadow-2xs">
+              <div className="flex flex-col gap-4 bg-white p-4 sm:p-5 rounded-3xl border border-stone-200 shadow-2xs">
                 <div>
                   <h2 className="text-base font-black text-stone-900 flex items-center gap-2">
                     {currentTab === 'history' ? (
@@ -631,7 +640,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 </div>
 
                 {/* Date Picker Control & Preset Buttons */}
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2 border-t border-stone-100 pt-3">
                   <div className="flex items-center gap-2 bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5">
                     <Calendar className="w-4 h-4 text-stone-500 shrink-0" />
                     <input
@@ -719,11 +728,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
               {/* Order Summary Stats for Filtered Date */}
               {orderDateFilter && (
-                <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between text-xs font-bold text-amber-900">
-                  <span>📅 Filtered Date: {orderDateFilter}</span>
-                  <span>Total Orders: {orders.length}</span>
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-amber-900">
+                  <span>📅 {orderDateFilter}</span>
+                  <span>Orders: {orders.length}</span>
                   <span>
-                    Total Revenue: ₹
+                    Revenue: ₹
                     {orders
                       .filter((o) => o.orderStatus !== 'CANCELLED')
                       .reduce((sum, o) => sum + o.total, 0)
@@ -734,7 +743,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
               {/* Orders Table */}
               <div className="bg-white rounded-3xl border border-stone-200 shadow-2xs overflow-hidden">
-                <table className="w-full text-left text-xs text-stone-700">
+                <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-stone-700 min-w-[700px]">
                   <thead className="bg-stone-50 border-b border-stone-200 uppercase font-bold text-stone-500">
                     <tr>
                       <th className="p-4">Order #</th>
@@ -757,7 +767,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     ) : (
                       orders.map((o) => (
                         <tr key={o.id} className="hover:bg-stone-50/80 transition-colors">
-                          <td className="p-4 font-bold text-stone-900">#{o.orderNumber}</td>
+                          <td className="p-4 font-bold text-stone-900 whitespace-nowrap">#{o.orderNumber}</td>
                           <td className="p-4 text-stone-500 whitespace-nowrap">
                             {new Date(o.createdAt).toLocaleDateString([], {
                               month: 'short',
@@ -771,12 +781,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                               })}
                             </span>
                           </td>
-                          <td className="p-4 font-semibold text-amber-700">{o.tableNumber}</td>
-                          <td className="p-4">{o.customerName || 'Guest'}</td>
-                          <td className="p-4 max-w-xs">
+                          <td className="p-4 font-semibold text-amber-700 whitespace-nowrap">{o.tableNumber}</td>
+                          <td className="p-4 whitespace-nowrap">{o.customerName || 'Guest'}</td>
+                          <td className="p-4 max-w-[180px] truncate">
                             {o.items.map((i) => `${i.quantity}x ${i.productName}`).join(', ')}
                           </td>
-                          <td className="p-4 font-black text-stone-900">₹{o.total.toFixed(2)}</td>
+                          <td className="p-4 font-black text-stone-900 whitespace-nowrap">₹{o.total.toFixed(2)}</td>
                           <td className="p-4">
                             <StatusBadge status={o.orderStatus} />
                           </td>
@@ -802,6 +812,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     )}
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           )}
@@ -809,16 +820,18 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           {/* TAB 6: STAFF */}
           {currentTab === 'staff' && (
             <div className="space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <h2 className="text-base font-bold text-stone-800">Staff Accounts</h2>
                 <Button variant="primary" onClick={() => setIsStaffModalOpen(true)}>
                   <Plus className="w-4 h-4 mr-1.5" />
-                  Add Staff Account
+                  <span className="hidden sm:inline">Add Staff Account</span>
+                  <span className="sm:hidden">Add</span>
                 </Button>
               </div>
 
               <div className="bg-white rounded-3xl border border-stone-200 shadow-2xs overflow-hidden">
-                <table className="w-full text-left text-xs text-stone-700">
+                <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs text-stone-700 min-w-[560px]">
                   <thead className="bg-stone-50 border-b border-stone-200 uppercase font-bold text-stone-500">
                     <tr>
                       <th className="p-4">Name</th>
@@ -879,13 +892,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </div>
           )}
 
           {/* TAB 7: SETTINGS */}
           {currentTab === 'settings' && settings && (
-            <div className="max-w-2xl bg-white rounded-3xl p-8 border border-stone-200 shadow-2xs">
+            <div className="max-w-2xl bg-white rounded-3xl p-5 sm:p-8 border border-stone-200 shadow-2xs">
               <h2 className="text-lg font-black text-stone-900 mb-6">Cafe Configuration Settings</h2>
               <form onSubmit={handleSaveSettings} className="space-y-4">
                 <Input label="Cafe Name" name="name" defaultValue={settings.name} required />
@@ -894,7 +908,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 <Input label="Phone Number" name="phone" defaultValue={settings.phone || ''} />
                 <Input label="Email" name="email" defaultValue={settings.email || ''} />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Input
                     label="Tax Percentage (%)"
                     name="taxRate"

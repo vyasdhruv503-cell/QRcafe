@@ -1,13 +1,20 @@
 import React from 'react';
 import type { CafeInfo, TableInfo } from '../../types';
-import { Utensils, MapPin } from 'lucide-react';
+import { Utensils, MapPin, History } from 'lucide-react';
 
 interface HeaderProps {
   cafe: CafeInfo;
   table: TableInfo;
+  onOpenOrderHistory?: () => void;
+  orderHistoryCount?: number;
 }
 
-export const Header: React.FC<HeaderProps> = ({ cafe, table }) => {
+export const Header: React.FC<HeaderProps> = ({
+  cafe,
+  table,
+  onOpenOrderHistory,
+  orderHistoryCount = 0,
+}) => {
   return (
     <header className="bg-stone-900/95 text-white backdrop-blur-md border-b border-stone-800 sticky top-0 z-30 shadow-md">
       <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -43,6 +50,22 @@ export const Header: React.FC<HeaderProps> = ({ cafe, table }) => {
 
         {/* Right Badge Controls */}
         <div className="flex items-center gap-2">
+          {onOpenOrderHistory && (
+            <button
+              onClick={onOpenOrderHistory}
+              className="relative bg-stone-800 hover:bg-stone-700 text-stone-200 px-3 py-1.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 border border-stone-700 active:scale-95"
+              title="View Order History"
+            >
+              <History className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">My Orders</span>
+              {orderHistoryCount > 0 && (
+                <span className="w-4 h-4 bg-amber-500 text-stone-900 rounded-full text-[10px] font-black flex items-center justify-center">
+                  {orderHistoryCount}
+                </span>
+              )}
+            </button>
+          )}
+
           <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-3 py-1.5 rounded-2xl text-xs font-black shadow-xs flex items-center gap-1.5 shrink-0">
             <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
             {table.number}

@@ -251,7 +251,7 @@ async function main() {
   }
 
   console.log(`✅ Created ${productCount} Products across categories`);
-  console.log('✨ Live SQLite Database seeded successfully!');
+  console.log('✨ Live Supabase PostgreSQL Database seeded successfully!');
 }
 
 main()

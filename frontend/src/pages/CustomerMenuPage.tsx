@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import type { CafeInfo, TableInfo, Category, Product, CartItem } from '../types';
+import type { CafeInfo, TableInfo, Category, Product, CartItem, OrderRecord } from '../types';
 import { api } from '../services/api';
 import { Header } from '../components/customer/Header';
 import { SearchBar } from '../components/customer/SearchBar';
@@ -8,6 +8,7 @@ import { ProductCard } from '../components/customer/ProductCard';
 import { ProductDetailModal } from '../components/customer/ProductDetailModal';
 import { CartDrawer } from '../components/customer/CartDrawer';
 import { StickyCartBar } from '../components/customer/StickyCartBar';
+import { OrderHistoryModal } from '../components/customer/OrderHistoryModal';
 
 interface CustomerMenuPageProps {
   tableToken: string;
@@ -153,9 +154,20 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [customerOrders, setCustomerOrders] = useState<OrderRecord[]>([]);
 
   const [isLoading, setIsLoading] = useState(true);
   const [menuError, setMenuError] = useState<string | null>(null);
+
+  const loadOrderHistory = async () => {
+    try {
+      const history = await api.getCustomerOrderHistory();
+      setCustomerOrders(history);
+    } catch (e) {
+      console.warn('Could not fetch order history:', e);
+    }
+  };
 
   // Fetch menu data by QR table token
   const loadMenuData = async () => {
@@ -180,6 +192,7 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
 
   useEffect(() => {
     loadMenuData();
+    loadOrderHistory();
   }, [tableToken]);
 
   // Cart operations
@@ -260,7 +273,15 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
   return (
     <div className="min-h-screen pb-28 bg-[#fdfbf7]">
       {/* Header */}
-      <Header cafe={cafe} table={table} />
+      <Header
+        cafe={cafe}
+        table={table}
+        onOpenOrderHistory={() => {
+          loadOrderHistory();
+          setIsHistoryOpen(true);
+        }}
+        orderHistoryCount={customerOrders.length}
+      />
 
       {/* Backend Warning Banner */}
       {menuError && (
@@ -364,6 +385,16 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
         onRemoveItem={(id) => handleUpdateCartQuantity(id, 0)}
         onClearCart={() => setCart([])}
         onPlaceOrder={handlePlaceOrderSubmit}
+      />
+
+      {/* Order History Modal */}
+      <OrderHistoryModal
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        orders={customerOrders}
+        onSelectOrder={(token) => {
+          onOrderPlaced(token);
+        }}
       />
     </div>
   );

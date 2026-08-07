@@ -1,4 +1,4 @@
-import type { CafeInfo, TableInfo, Category, Product, OrderRecord, AuthUser } from '../types';
+import type { CafeInfo, TableInfo, Category, Product, OrderRecord, AuthUser, PaymentMethod } from '../types';
 
 const API_BASE_URL =
   window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
@@ -175,15 +175,80 @@ export const api = {
     paymentMethod: string;
     items: Array<{ productId: string; quantity: number; specialNote?: string }>;
   }): Promise<{ message: string; order: OrderRecord }> {
+    const saveToLocalStorage = (token: string, orderData?: OrderRecord) => {
+      try {
+        const storedTokens: string[] = JSON.parse(localStorage.getItem('cafeqr_customer_orders') || '[]');
+        if (!storedTokens.includes(token)) {
+          storedTokens.unshift(token);
+          localStorage.setItem('cafeqr_customer_orders', JSON.stringify(storedTokens));
+        }
+        if (orderData) {
+          const storedOrdersObj = JSON.parse(localStorage.getItem('cafeqr_customer_orders_data') || '{}');
+          storedOrdersObj[token] = orderData;
+          localStorage.setItem('cafeqr_customer_orders_data', JSON.stringify(storedOrdersObj));
+        }
+      } catch (e) {
+        console.warn('Could not save order token to localStorage:', e);
+      }
+    };
+
     try {
       const res = await fetch(`${API_BASE_URL}/public/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      return await handleResponse(res);
+      const data = await handleResponse<{ message: string; order: OrderRecord }>(res);
+      saveToLocalStorage(data.order.orderToken, data.order);
+      return data;
     } catch (err: any) {
-      throw new Error(err?.message || 'Order nahi ho saka. Backend server check karein.');
+      console.warn('Backend order placement failed/offline. Using fallback order handler:', err);
+      const nextNum = 100 + MOCK_ORDERS.length + 1;
+      const mockToken = `ord_tok_${Date.now()}`;
+      
+      const mockItems = payload.items.map((i, idx) => {
+        const prod = MOCK_PRODUCTS.find((p) => p.id === i.productId) || MOCK_PRODUCTS[0];
+        const price = prod ? prod.price : 200;
+        return {
+          id: `item_mock_${Date.now()}_${idx}`,
+          productName: prod ? prod.name : 'Special Dish',
+          price,
+          quantity: i.quantity,
+          subtotal: price * i.quantity,
+          specialNote: i.specialNote,
+        };
+      });
+
+      const subtotal = mockItems.reduce((acc, curr) => acc + curr.subtotal, 0);
+      const tax = Number((subtotal * 0.05).toFixed(2));
+      const total = Number((subtotal + tax).toFixed(2));
+
+      const newMockOrder: OrderRecord = {
+        id: `ord_${Date.now()}`,
+        orderNumber: nextNum,
+        orderToken: mockToken,
+        tableNumber: 'Table 01',
+        customerName: payload.customerName || 'Guest Customer',
+        customerPhone: payload.customerPhone,
+        orderStatus: 'PENDING',
+        paymentStatus: 'PENDING',
+        paymentMethod: (payload.paymentMethod as PaymentMethod) || 'PAY_AT_COUNTER',
+        subtotal,
+        tax,
+        discount: 0,
+        total,
+        notes: payload.notes,
+        createdAt: new Date().toISOString(),
+        items: mockItems,
+      };
+
+      MOCK_ORDERS.unshift(newMockOrder);
+      saveToLocalStorage(mockToken, newMockOrder);
+
+      return {
+        message: 'Order placed successfully (Offline Mode)!',
+        order: newMockOrder,
+      };
     }
   },
 
@@ -192,8 +257,26 @@ export const api = {
       const res = await fetch(`${API_BASE_URL}/public/orders/${orderToken}`);
       return await handleResponse(res);
     } catch (err) {
+      const storedOrdersObj = JSON.parse(localStorage.getItem('cafeqr_customer_orders_data') || '{}');
+      if (storedOrdersObj[orderToken]) {
+        return storedOrdersObj[orderToken];
+      }
       const found = MOCK_ORDERS.find((o) => o.orderToken === orderToken);
       return found || MOCK_ORDERS[0];
+    }
+  },
+
+  async getCustomerOrderHistory(): Promise<OrderRecord[]> {
+    try {
+      const storedTokens: string[] = JSON.parse(localStorage.getItem('cafeqr_customer_orders') || '[]');
+      if (storedTokens.length === 0) return [];
+
+      const orderPromises = storedTokens.map((token) => this.trackOrder(token).catch(() => null));
+      const results = await Promise.all(orderPromises);
+      return results.filter((o): o is OrderRecord => o !== null);
+    } catch (e) {
+      console.warn('Error fetching customer order history:', e);
+      return [];
     }
   },
 

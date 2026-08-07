@@ -220,6 +220,14 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
         paymentStatus: newOrder.paymentStatus,
         createdAt: newOrder.createdAt,
         itemsCount: newOrder.orderItems.length,
+        items: newOrder.orderItems.map((item) => ({
+          id: item.id,
+          productName: item.productNameSnapshot,
+          price: Number(item.priceSnapshot),
+          quantity: item.quantity,
+          subtotal: Number(item.subtotal),
+          specialNote: item.specialNote,
+        })),
       },
     });
   } catch (error) {
