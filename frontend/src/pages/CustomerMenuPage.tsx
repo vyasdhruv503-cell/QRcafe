@@ -272,7 +272,7 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
   }, [products, selectedCategory, searchQuery, isVegOnly]);
 
   return (
-    <div className="min-h-screen pb-28 bg-[#fdfbf7]">
+    <div className="min-h-screen pb-28 bg-[#140D0B] text-stone-100 font-sans">
       {/* Header */}
       <Header
         cafe={cafe}
@@ -286,7 +286,7 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
 
       {/* Backend Warning Banner */}
       {menuError && (
-        <div className="bg-rose-600 text-white text-xs font-bold px-4 py-2.5 flex items-center justify-between gap-3">
+        <div className="bg-rose-950/80 text-rose-200 border-b border-rose-800 text-xs font-bold px-4 py-2.5 flex items-center justify-between gap-3">
           <span>⚠️ {menuError}</span>
           <button onClick={loadMenuData} className="underline shrink-0">Retry</button>
         </div>
@@ -301,18 +301,18 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
           </div>
           <button
             onClick={() => setIsVegOnly(!isVegOnly)}
-            className={`px-3 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center gap-1.5 shrink-0 border active:scale-95 ${
+            className={`px-3.5 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center gap-1.5 shrink-0 border active:scale-95 ${
               isVegOnly
-                ? 'bg-emerald-600 text-white border-emerald-500 shadow-md shadow-emerald-600/20'
-                : 'bg-white text-stone-700 border-stone-200 hover:bg-stone-50'
+                ? 'bg-gradient-to-r from-[#00F5D4] to-[#10B981] text-[#140D0B] border-[#00F5D4] box-glow-green'
+                : 'bg-[#1F1512] text-stone-300 border-[#38241D] hover:bg-[#2A1D18]'
             }`}
           >
             <span
               className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center p-[2px] ${
-                isVegOnly ? 'border-white' : 'border-emerald-600'
+                isVegOnly ? 'border-[#140D0B]' : 'border-[#00F5D4]'
               }`}
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${isVegOnly ? 'bg-white' : 'bg-emerald-600'}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${isVegOnly ? 'bg-[#140D0B]' : 'bg-[#00F5D4]'}`} />
             </span>
             <span>Veg Only</span>
           </button>
@@ -327,7 +327,8 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
 
         {/* Menu Section Title */}
         <div className="pt-2 flex items-center justify-between">
-          <h2 className="text-sm font-extrabold uppercase tracking-wider text-stone-800">
+          <h2 className="text-sm font-black uppercase tracking-wider text-[#00F5D4] flex items-center gap-2">
+            <span className="w-1.5 h-4 bg-[#00F5D4] rounded-full inline-block box-glow-green" />
             {selectedCategory === 'ALL'
               ? 'Full Menu'
               : categories.find((c) => c.id === selectedCategory)?.name || 'Category'}
@@ -339,8 +340,8 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
 
         {/* Product Cards List */}
         {filteredProducts.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center border border-stone-200 shadow-2xs">
-            <p className="text-sm font-bold text-stone-700 mb-1">No items found</p>
+          <div className="bg-[#1F1512] rounded-3xl p-12 text-center border border-[#38241D] shadow-lg">
+            <p className="text-sm font-bold text-white mb-1">No items found</p>
             <p className="text-xs text-stone-400">Try adjusting your search or category filter.</p>
           </div>
         ) : (

@@ -44,20 +44,23 @@ export const Modal: React.FC<ModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-stone-900/60 backdrop-blur-sm transition-opacity animate-fadeIn"
+        className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-fadeIn"
         onClick={onClose}
       />
 
       {/* Modal Dialog */}
       <div
-        className={`relative w-full ${maxWidthClasses[maxWidth]} bg-white rounded-2xl shadow-2xl overflow-hidden transform transition-all z-10 animate-scaleUp`}
+        className={`relative w-full ${maxWidthClasses[maxWidth]} bg-[#1C120F] text-white rounded-3xl shadow-2xl overflow-hidden transform transition-all z-10 animate-scaleUp border border-[#38241D]`}
       >
         {title && (
-          <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100 bg-stone-50/50">
-            <h3 className="text-lg font-bold text-stone-800">{title}</h3>
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#38241D] bg-[#170E0B]">
+            <h3 className="text-lg font-black text-[#00F5D4] flex items-center gap-2">
+              <span className="w-1.5 h-4 bg-[#00F5D4] rounded-full inline-block box-glow-green" />
+              {title}
+            </h3>
             <button
               onClick={onClose}
-              className="p-1 rounded-lg text-stone-400 hover:text-stone-700 hover:bg-stone-100 transition-colors"
+              className="p-1.5 rounded-xl text-stone-400 hover:text-white hover:bg-[#2B1C17] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>

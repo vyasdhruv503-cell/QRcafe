@@ -69,19 +69,19 @@ export const CustomerOrderTrackerPage: React.FC<CustomerOrderTrackerPageProps> =
   const currentStepIndex = Math.max(0, steps.indexOf(order.orderStatus));
 
   return (
-    <div className="min-h-screen bg-[#fdfbf7] p-4 max-w-lg mx-auto">
+    <div className="min-h-screen bg-[#140D0B] text-white p-4 max-w-lg mx-auto font-sans">
       {/* Top Bar */}
       <div className="flex items-center justify-between py-4">
         <button
           onClick={onBackToMenu}
-          className="flex items-center gap-1.5 text-xs font-bold text-stone-600 hover:text-stone-900 transition-colors"
+          className="flex items-center gap-1.5 text-xs font-bold text-[#00F5D4] hover:text-white transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 stroke-[3]" />
           Back to Menu
         </button>
         <button
           onClick={fetchOrderStatus}
-          className="p-2 text-stone-400 hover:text-amber-600 rounded-xl transition-colors"
+          className="p-2 text-stone-400 hover:text-[#00F5D4] rounded-xl transition-colors"
           title="Refresh Status"
         >
           <RefreshCw className="w-4 h-4" />
@@ -89,31 +89,32 @@ export const CustomerOrderTrackerPage: React.FC<CustomerOrderTrackerPageProps> =
       </div>
 
       {/* Main Order Card */}
-      <div className="bg-white rounded-3xl p-6 border border-stone-200 shadow-xl space-y-6">
+      <div className="bg-[#1F1512] rounded-3xl p-6 border border-[#38241D] shadow-2xl space-y-6">
         {/* Header info */}
-        <div className="text-center pb-4 border-b border-stone-100">
-          <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto text-amber-600 mb-3 shadow-xs">
-            <Utensils className="w-7 h-7" />
+        <div className="text-center pb-4 border-b border-[#33221B]">
+          <div className="w-14 h-14 bg-[#281A15] border border-[#483027] text-[#00F5D4] rounded-2xl flex items-center justify-center mx-auto mb-3 box-glow-green">
+            <Utensils className="w-7 h-7 text-[#00F5D4]" />
           </div>
-          <span className="text-xs font-bold uppercase tracking-wider text-amber-800">
-            {order.cafeName || 'My Cafe'}
-          </span>
-          <h1 className="text-2xl font-black text-stone-900 mt-0.5">Order #{order.orderNumber}</h1>
-          <p className="text-xs text-stone-500 font-semibold mt-1">{order.tableNumber}</p>
+          <div className="flex items-center justify-center gap-1 mb-1">
+            <span className="text-glow-green font-black text-lg">tea</span>
+            <span className="text-glow-white font-black text-lg">wala</span>
+          </div>
+          <h1 className="text-2xl font-black text-white mt-0.5">Order #{order.orderNumber}</h1>
+          <p className="text-xs text-[#00F5D4] font-semibold mt-1">{order.tableNumber}</p>
         </div>
 
         {/* Live Status Progress Stepper */}
         <div className="py-2">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-stone-500">Live Status</span>
+            <span className="text-xs font-bold uppercase tracking-wider text-[#00F5D4]">Live Status</span>
             <StatusBadge status={order.orderStatus} />
           </div>
 
           <div className="relative flex items-center justify-between px-2">
             {/* Progress line */}
-            <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-1 bg-stone-100 -z-0" />
+            <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-1 bg-[#2C1D18] -z-0" />
             <div
-              className="absolute left-6 top-1/2 -translate-y-1/2 h-1 bg-amber-600 transition-all duration-500 -z-0"
+              className="absolute left-6 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-[#00F5D4] to-[#10B981] transition-all duration-500 -z-0 box-glow-green"
               style={{
                 width: `${Math.max(0, (currentStepIndex / (steps.length - 1)) * 100)}%`,
               }}
@@ -125,15 +126,15 @@ export const CustomerOrderTrackerPage: React.FC<CustomerOrderTrackerPageProps> =
               return (
                 <div key={step} className="relative z-10 flex flex-col items-center">
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all shadow-xs ${
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                       isDone
-                        ? 'bg-amber-600 text-white ring-4 ring-amber-100'
-                        : 'bg-white border-2 border-stone-200 text-stone-400'
+                        ? 'bg-[#00F5D4] text-[#140D0B] box-glow-green ring-4 ring-[#00F5D4]/20'
+                        : 'bg-[#2B1C17] border-2 border-[#482F26] text-stone-400'
                     } ${isCurrent ? 'animate-bounce' : ''}`}
                   >
-                    {isDone ? <CheckCircle2 className="w-4 h-4" /> : idx + 1}
+                    {isDone ? <CheckCircle2 className="w-4 h-4 stroke-[3]" /> : idx + 1}
                   </div>
-                  <span className="text-[10px] font-bold text-stone-600 mt-2 capitalize">
+                  <span className="text-[10px] font-bold text-stone-300 mt-2 capitalize">
                     {step.toLowerCase()}
                   </span>
                 </div>
@@ -143,20 +144,20 @@ export const CustomerOrderTrackerPage: React.FC<CustomerOrderTrackerPageProps> =
         </div>
 
         {/* Order Details Breakdown */}
-        <div className="bg-stone-50 rounded-2xl p-4 border border-stone-200/70 space-y-3">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-stone-500">Ordered Items</h3>
+        <div className="bg-[#170E0B] rounded-2xl p-4 border border-[#38241D] space-y-3">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-[#00F5D4]">Ordered Items</h3>
           <div className="space-y-2">
             {order.items.map((item) => (
-              <div key={item.id} className="flex justify-between text-xs font-semibold text-stone-800">
+              <div key={item.id} className="flex justify-between text-xs font-semibold text-[#F8FAFC]">
                 <span>
                   {item.quantity}x {item.productName}
                 </span>
-                <span>₹{item.subtotal.toFixed(2)}</span>
+                <span className="text-[#00F5D4]">₹{item.subtotal.toFixed(2)}</span>
               </div>
             ))}
           </div>
 
-          <div className="pt-3 border-t border-stone-200 space-y-1 text-xs font-medium text-stone-600">
+          <div className="pt-3 border-t border-[#38241D] space-y-1 text-xs font-medium text-stone-300">
             <div className="flex justify-between">
               <span>Subtotal</span>
               <span>₹{order.subtotal.toFixed(2)}</span>
@@ -165,9 +166,9 @@ export const CustomerOrderTrackerPage: React.FC<CustomerOrderTrackerPageProps> =
               <span>Tax</span>
               <span>₹{order.tax.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-sm font-black text-stone-900 pt-2 border-t border-stone-200">
+            <div className="flex justify-between text-sm font-black text-white pt-2 border-t border-[#38241D]">
               <span>Total Amount</span>
-              <span className="text-amber-700">₹{order.total.toFixed(2)}</span>
+              <span className="text-[#00F5D4]">₹{order.total.toFixed(2)}</span>
             </div>
           </div>
         </div>

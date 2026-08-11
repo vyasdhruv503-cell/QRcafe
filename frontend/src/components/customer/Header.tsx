@@ -16,35 +16,34 @@ export const Header: React.FC<HeaderProps> = ({
   orderHistoryCount = 0,
 }) => {
   return (
-    <header className="bg-stone-900/95 text-white backdrop-blur-md border-b border-stone-800 sticky top-0 z-30 shadow-md">
+    <header className="bg-[#170E0B]/95 text-white backdrop-blur-md border-b border-[#38241D] sticky top-0 z-30 shadow-xl">
       <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-        {/* Cafe Logo & Info */}
+        {/* Teawala Dark Brown Signboard Brand Header */}
         <div className="flex items-center gap-3">
-          {cafe.logo ? (
-            <img
-              src={cafe.logo}
-              alt={cafe.name}
-              className="w-10 h-10 rounded-2xl object-cover ring-2 ring-amber-500/40 shadow-xs shrink-0"
-            />
-          ) : (
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-xs shrink-0 font-bold">
-              <Utensils className="w-5 h-5" />
-            </div>
-          )}
+          <div className="w-10 h-10 rounded-2xl bg-[#281A15] border border-[#4A3228] flex items-center justify-center text-[#00F5D4] box-glow-green shrink-0 font-bold shadow-md">
+            <Utensils className="w-5 h-5 text-[#00F5D4]" />
+          </div>
+
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h1 className="text-base font-black tracking-tight text-stone-100 truncate">{cafe.name}</h1>
-              <span className="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-500/30 shrink-0 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+            {/* Glowing Brand Title matching the store sign */}
+            <div className="flex items-center gap-1.5">
+              <span className="text-glow-green font-black text-xl tracking-tight">tea</span>
+              <span className="text-glow-white font-black text-xl tracking-tight">wala</span>
+              <span className="w-1 h-5 bg-gradient-to-b from-amber-400 to-amber-600 rounded-full box-glow-amber mx-1 inline-block shrink-0" />
+              <span className="text-glow-amber text-[10px] font-black tracking-widest uppercase shrink-0 hidden xs:inline">
+                TRADITIONAL
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 mt-0.5">
+              <span className="text-xs text-stone-300 font-semibold truncate max-w-[140px] sm:max-w-[200px]">
+                {cafe.name}
+              </span>
+              <span className="bg-[#00F5D4]/20 text-[#00F5D4] text-[9px] font-black px-2 py-0.5 rounded-full border border-[#00F5D4]/40 shrink-0 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00F5D4] animate-ping" />
                 OPEN
               </span>
             </div>
-            {cafe.address && (
-              <p className="text-[11px] text-stone-400 flex items-center gap-1 mt-0.5">
-                <MapPin className="w-3 h-3 text-amber-500 shrink-0" />
-                <span className="truncate max-w-[170px]">{cafe.address}</span>
-              </p>
-            )}
           </div>
         </div>
 
@@ -53,21 +52,21 @@ export const Header: React.FC<HeaderProps> = ({
           {onOpenOrderHistory && (
             <button
               onClick={onOpenOrderHistory}
-              className="relative bg-stone-800 hover:bg-stone-700 text-stone-200 px-3 py-1.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 border border-stone-700 active:scale-95"
+              className="relative bg-[#251814] hover:bg-[#33221B] text-stone-200 px-3 py-1.5 rounded-2xl text-xs font-bold transition-all flex items-center gap-1.5 border border-[#422C24] active:scale-95 shadow-sm"
               title="View Order History"
             >
-              <History className="w-3.5 h-3.5 text-amber-400" />
+              <History className="w-3.5 h-3.5 text-[#00F5D4]" />
               <span className="hidden sm:inline">My Orders</span>
               {orderHistoryCount > 0 && (
-                <span className="w-4 h-4 bg-amber-500 text-stone-900 rounded-full text-[10px] font-black flex items-center justify-center">
+                <span className="w-4 h-4 bg-[#00F5D4] text-[#140D0B] rounded-full text-[10px] font-black flex items-center justify-center shadow-xs">
                   {orderHistoryCount}
                 </span>
               )}
             </button>
           )}
 
-          <div className="bg-gradient-to-r from-amber-500 to-orange-600 text-white px-3 py-1.5 rounded-2xl text-xs font-black shadow-xs flex items-center gap-1.5 shrink-0">
-            <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+          <div className="bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 text-stone-950 px-3.5 py-1.5 rounded-2xl text-xs font-black shadow-md flex items-center gap-1.5 shrink-0 border border-amber-400/40">
+            <span className="w-2 h-2 rounded-full bg-stone-950 animate-pulse" />
             {table.number}
           </div>
         </div>

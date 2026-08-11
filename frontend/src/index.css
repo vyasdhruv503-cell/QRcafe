@@ -6,13 +6,72 @@
 
 :root {
   font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 body {
-  background-color: #fdfbf7;
-  color: #1c1917;
+  background-color: #140D0B;
+  color: #F8FAFC;
   overflow-x: hidden;
+}
+
+/* --- TEAWALA SIGNBOARD GLOWING TEXT SHADOW STYLES --- */
+.text-glow-green {
+  color: #00F5D4;
+  text-shadow: 
+    0 0 5px rgba(0, 245, 212, 0.9),
+    0 0 15px rgba(0, 245, 212, 0.7),
+    0 0 25px rgba(16, 185, 129, 0.5),
+    0 0 40px rgba(0, 245, 212, 0.3);
+}
+
+.text-glow-white {
+  color: #FFFFFF;
+  text-shadow: 
+    0 0 5px rgba(255, 255, 255, 0.95),
+    0 0 15px rgba(255, 255, 255, 0.7),
+    0 0 25px rgba(255, 255, 255, 0.4);
+}
+
+.text-glow-amber {
+  color: #FBBF24;
+  text-shadow: 
+    0 0 6px rgba(251, 191, 36, 0.8),
+    0 0 18px rgba(245, 158, 11, 0.5);
+}
+
+.box-glow-green {
+  box-shadow: 
+    0 0 15px rgba(0, 245, 212, 0.35),
+    0 0 30px rgba(16, 185, 129, 0.2);
+}
+
+.box-glow-green-lg {
+  box-shadow: 
+    0 0 20px rgba(0, 245, 212, 0.5),
+    0 0 40px rgba(16, 185, 129, 0.3);
+}
+
+.box-glow-amber {
+  box-shadow: 
+    0 0 12px rgba(251, 191, 36, 0.6),
+    0 0 24px rgba(245, 158, 11, 0.3);
+}
+
+.border-dark-brown {
+  border-color: #38241D;
+}
+
+.bg-dark-brown-base {
+  background-color: #140D0B;
+}
+
+.bg-dark-brown-card {
+  background-color: #1F1512;
+}
+
+.bg-dark-brown-elevated {
+  background-color: #2A1D18;
 }
 
 /* Custom scrollbar for horizontal category tab list */
