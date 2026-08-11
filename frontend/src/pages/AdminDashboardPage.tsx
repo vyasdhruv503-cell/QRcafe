@@ -283,100 +283,107 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           )}
 
           {/* TAB 1: DASHBOARD */}
-          {currentTab === 'dashboard' && dashboardData && (
-            <div className="space-y-8">
-              {/* Stat Cards Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard
-                  title="Today's Revenue"
-                  value={`₹${dashboardData.metrics.todaySales.toFixed(2)}`}
-                  subtitle={`${dashboardData.metrics.todayOrders} orders today`}
-                  icon={DollarSign}
-                  color="amber"
-                />
-                <StatCard
-                  title="Active Orders"
-                  value={
-                    dashboardData.metrics.pendingOrders +
-                    dashboardData.metrics.preparingOrders
-                  }
-                  subtitle={`${dashboardData.metrics.pendingOrders} pending kitchen approval`}
-                  icon={Clock}
-                  color="indigo"
-                />
-                <StatCard
-                  title="Completed Orders"
-                  value={dashboardData.metrics.completedOrders}
-                  subtitle={`Out of ${dashboardData.metrics.totalOrders} total orders`}
-                  icon={ShoppingBag}
-                  color="emerald"
-                />
-                <StatCard
-                  title="Menu Products"
-                  value={dashboardData.metrics.totalProducts}
-                  subtitle={`${dashboardData.metrics.totalTables} active QR tables`}
-                  icon={UtensilsCrossed}
-                  color="blue"
-                />
+          {currentTab === 'dashboard' && (
+            isLoading && !dashboardData ? (
+              <div className="flex flex-col items-center justify-center p-12 text-stone-400 font-semibold text-sm">
+                <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3" />
+                Loading dashboard metrics...
               </div>
-
-              {/* Charts Section */}
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* 7-Day Revenue Trend (Recharts) */}
-                <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-stone-200 shadow-2xs">
-                  <h3 className="text-base font-extrabold text-stone-900 mb-4">
-                    7-Day Revenue Overview
-                  </h3>
-                  <div className="h-72 w-full">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={dashboardData.salesTrend}>
-                        <defs>
-                          <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#d97706" stopOpacity={0.4} />
-                            <stop offset="95%" stopColor="#d97706" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                        <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} />
-                        <YAxis stroke="#94a3b8" fontSize={12} />
-                        <Tooltip />
-                        <Area
-                          type="monotone"
-                          dataKey="sales"
-                          stroke="#d97706"
-                          strokeWidth={3}
-                          fillOpacity={1}
-                          fill="url(#salesGrad)"
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
+            ) : dashboardData ? (
+              <div className="space-y-8">
+                {/* Stat Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <StatCard
+                    title="Today's Revenue"
+                    value={`₹${dashboardData.metrics.todaySales.toFixed(2)}`}
+                    subtitle={`${dashboardData.metrics.todayOrders} orders today`}
+                    icon={DollarSign}
+                    color="amber"
+                  />
+                  <StatCard
+                    title="Active Orders"
+                    value={
+                      dashboardData.metrics.pendingOrders +
+                      dashboardData.metrics.preparingOrders
+                    }
+                    subtitle={`${dashboardData.metrics.pendingOrders} pending kitchen approval`}
+                    icon={Clock}
+                    color="indigo"
+                  />
+                  <StatCard
+                    title="Completed Orders"
+                    value={dashboardData.metrics.completedOrders}
+                    subtitle={`Out of ${dashboardData.metrics.totalOrders} total orders`}
+                    icon={ShoppingBag}
+                    color="emerald"
+                  />
+                  <StatCard
+                    title="Menu Products"
+                    value={dashboardData.metrics.totalProducts}
+                    subtitle={`${dashboardData.metrics.totalTables} active QR tables`}
+                    icon={UtensilsCrossed}
+                    color="blue"
+                  />
                 </div>
 
-                {/* Top Selling Products */}
-                <div className="bg-white rounded-3xl p-6 border border-stone-200 shadow-2xs">
-                  <h3 className="text-base font-extrabold text-stone-900 mb-4">
-                    Top Selling Products
-                  </h3>
-                  <div className="space-y-4">
-                    {dashboardData.popularProducts.map((item: any, idx: number) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between p-3 bg-stone-50 rounded-2xl border border-stone-100"
-                      >
-                        <div>
-                          <p className="text-xs font-bold text-stone-900">{item.name}</p>
-                          <p className="text-[11px] text-stone-500">{item.quantity} sold</p>
+                {/* Charts Section */}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* 7-Day Revenue Trend (Recharts) */}
+                  <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-stone-200 shadow-2xs">
+                    <h3 className="text-base font-extrabold text-stone-900 mb-4">
+                      7-Day Revenue Overview
+                    </h3>
+                    <div className="h-72 w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={dashboardData.salesTrend}>
+                          <defs>
+                            <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#d97706" stopOpacity={0.4} />
+                              <stop offset="95%" stopColor="#d97706" stopOpacity={0} />
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                          <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} />
+                          <YAxis stroke="#94a3b8" fontSize={12} />
+                          <Tooltip />
+                          <Area
+                            type="monotone"
+                            dataKey="sales"
+                            stroke="#d97706"
+                            strokeWidth={3}
+                            fillOpacity={1}
+                            fill="url(#salesGrad)"
+                          />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  {/* Top Selling Products */}
+                  <div className="bg-white rounded-3xl p-6 border border-stone-200 shadow-2xs">
+                    <h3 className="text-base font-extrabold text-stone-900 mb-4">
+                      Top Selling Products
+                    </h3>
+                    <div className="space-y-4">
+                      {dashboardData.popularProducts.map((item: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between p-3 bg-stone-50 rounded-2xl border border-stone-100"
+                        >
+                          <div>
+                            <p className="text-xs font-bold text-stone-900">{item.name}</p>
+                            <p className="text-[11px] text-stone-500">{item.quantity} sold</p>
+                          </div>
+                          <span className="text-xs font-extrabold text-amber-700">
+                            ₹{item.revenue.toFixed(2)}
+                          </span>
                         </div>
-                        <span className="text-xs font-extrabold text-amber-700">
-                          ₹{item.revenue.toFixed(2)}
-                        </span>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            ) : null
           )}
 
           {/* TAB 2: PRODUCTS */}
