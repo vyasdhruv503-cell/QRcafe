@@ -12,4 +12,4 @@ services:
       - key: DATABASE_URL
         value: postgresql://postgres.snurrwdzxifjjtpzqvin:QRcafe123dv@aws-0-ap-south-1.pooler.supabase.com:5432/postgres
       - key: FRONTEND_URL
-        value: https://cafeqr-system.onrender.com
+        value: https://qrcafe-2ymu.onrender.com
