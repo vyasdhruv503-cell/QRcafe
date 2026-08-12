@@ -4,7 +4,9 @@ import { Prisma } from '@prisma/client';
 
 export const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
   const timestamp = new Date().toISOString();
-  console.error(`🚨 [Error Middleware] ${req.method} ${req.originalUrl} [${timestamp}]:`, err.message || err);
+  const errMsg = err.message || err.toString() || JSON.stringify(err) || 'Unknown error';
+  console.error(`🚨 [Error Middleware] ${req.method} ${req.originalUrl} [${timestamp}]:`, errMsg);
+  if (!err.message && err.stack) console.error('Stack:', err.stack);
 
   // 1. Handle Zod Validation Errors
   if (err instanceof ZodError) {
