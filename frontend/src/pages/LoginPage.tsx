@@ -11,11 +11,11 @@ interface LoginPageProps {
 
 const MOCK_ADMIN_USER: AuthUser = {
   id: 'user_admin_1',
-  name: 'Cafe Admin Manager',
+  name: 'TeaWala Admin Manager',
   email: 'admin@cafeqr.com',
   role: 'ADMIN',
   cafeId: 'cafe_1',
-  cafeName: 'My Cafe',
+  cafeName: 'TeaWala',
   currency: '₹',
 };
 
@@ -25,7 +25,7 @@ const MOCK_KITCHEN_USER: AuthUser = {
   email: 'kitchen@cafeqr.com',
   role: 'KITCHEN',
   cafeId: 'cafe_1',
-  cafeName: 'My Cafe',
+  cafeName: 'TeaWala',
   currency: '₹',
 };
 
@@ -62,22 +62,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-stone-900 p-4">
-      <div className="max-w-md w-full bg-white rounded-3xl p-8 shadow-2xl space-y-6">
+    <div className="min-h-screen flex items-center justify-center bg-[#FAF7F2] p-4 font-sans">
+      <div className="max-w-md w-full bg-white border border-[#E2DCD5] rounded-3xl p-8 shadow-xl space-y-6">
         {/* Brand Header */}
         <div className="text-center">
-          <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-600 rounded-2xl flex items-center justify-center text-white mx-auto mb-3 shadow-lg">
-            <QrCode className="w-8 h-8" />
+          <div className="h-16 px-4 bg-[#251713] border border-[#4A3228] rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-md inline-block">
+            <img src="/logo.png" alt="TeaWala Logo" className="h-12 w-auto object-contain mx-auto" />
           </div>
-          <h1 className="text-2xl font-black text-stone-900">CafeQR Portal</h1>
-          <p className="text-xs text-stone-500 font-semibold mt-1">
+          <h1 className="text-2xl font-black text-[#1C130E] tracking-wide">TeaWala Portal</h1>
+          <p className="text-xs text-stone-500 font-medium mt-1">
             Sign in to access Admin Dashboard or Kitchen View
           </p>
         </div>
 
         {error && (
-          <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold rounded-xl flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold rounded-2xl flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
             <span>{error}</span>
           </div>
         )}
@@ -89,7 +89,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             placeholder="Enter your User ID or Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            icon={<User className="w-4 h-4" />}
+            icon={<User className="w-4 h-4 text-[#10B981]" />}
             required
           />
 
@@ -99,11 +99,11 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            icon={<Lock className="w-4 h-4" />}
+            icon={<Lock className="w-4 h-4 text-[#10B981]" />}
             required
           />
 
-          <Button variant="primary" className="w-full py-3 text-sm shadow-md font-bold" isLoading={isLoading}>
+          <Button variant="primary" className="w-full py-3.5 text-sm shadow-md font-extrabold" isLoading={isLoading}>
             Sign In to Portal
           </Button>
         </form>

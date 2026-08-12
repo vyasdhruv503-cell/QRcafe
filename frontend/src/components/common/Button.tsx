@@ -16,14 +16,19 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseStyle =
-    'inline-flex items-center justify-center font-medium transition-all duration-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none disabled:transform-none';
+    'inline-flex items-center justify-center font-bold transition-all duration-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:ring-offset-2 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none disabled:transform-none';
 
   const variantStyles = {
-    primary: 'bg-amber-600 hover:bg-amber-700 text-white shadow-sm shadow-amber-600/20',
-    secondary: 'bg-stone-800 hover:bg-stone-900 text-white shadow-sm',
-    outline: 'border border-stone-300 hover:bg-stone-100 text-stone-700',
-    danger: 'bg-rose-600 hover:bg-rose-700 text-white shadow-sm',
-    ghost: 'text-stone-600 hover:bg-stone-100 hover:text-stone-900',
+    primary:
+      'bg-gradient-to-r from-[#10B981] to-[#059669] text-white font-extrabold shadow-md shadow-emerald-600/20 hover:brightness-105 active:scale-95',
+    secondary:
+      'bg-[#F0EAE1] hover:bg-[#E5DDCF] text-[#2C1E18] border border-[#E2DCD5] font-bold',
+    outline:
+      'border border-[#D4C9BD] text-[#2C1E18] hover:bg-[#F5EFE6] hover:border-[#10B981]/60 font-bold',
+    danger:
+      'bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-500 hover:to-rose-600 text-white shadow-md',
+    ghost:
+      'text-stone-600 hover:bg-[#F5EFE6] hover:text-[#1C130E]',
   };
 
   const sizeStyles = {

@@ -20,8 +20,8 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* Teawala Dark Brown Signboard Brand Header */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#281A15] border border-[#4A3228] flex items-center justify-center text-[#00F5D4] box-glow-green shrink-0 font-bold shadow-md">
-            <Utensils className="w-5 h-5 text-[#00F5D4]" />
+          <div className="h-10 px-2.5 rounded-2xl bg-[#251713] border border-[#4A3228] flex items-center justify-center shrink-0 shadow-md">
+            <img src="/logo.png" alt="TeaWala Logo" className="h-7 w-auto object-contain" />
           </div>
 
           <div className="min-w-0">
@@ -30,8 +30,8 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="text-glow-green font-black text-xl tracking-tight">tea</span>
               <span className="text-glow-white font-black text-xl tracking-tight">wala</span>
               <span className="w-1 h-5 bg-gradient-to-b from-amber-400 to-amber-600 rounded-full box-glow-amber mx-1 inline-block shrink-0" />
-              <span className="text-glow-amber text-[10px] font-black tracking-widest uppercase shrink-0 hidden xs:inline">
-                TRADITIONAL
+              <span className="text-glow-amber text-[10px] font-black tracking-widest uppercase shrink-0 inline-block">
+                EXOTIC. TRADITIONAL.
               </span>
             </div>
 

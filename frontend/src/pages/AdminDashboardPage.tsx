@@ -26,6 +26,7 @@ import {
   Calendar,
   History,
   IdCard,
+  Download,
   X,
 } from 'lucide-react';
 import {
@@ -67,6 +68,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [orderStatusFilter, setOrderStatusFilter] = useState('ALL');
   const [orderSearchQuery, setOrderSearchQuery] = useState('');
   const [orderDateFilter, setOrderDateFilter] = useState('');
+  const [orderRangeFilter, setOrderRangeFilter] = useState('30days'); // Default to 1 Month History
 
   // Modals
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
@@ -93,6 +95,65 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // Download Order History CSV Handler
+  const handleDownloadHistoryCSV = () => {
+    if (orders.length === 0) {
+      alert('No orders available to download for the selected filters.');
+      return;
+    }
+
+    const headers = [
+      'Order Number',
+      'Date',
+      'Time',
+      'Table Number',
+      'Customer Name',
+      'Customer Phone',
+      'Items Summary',
+      'Subtotal (INR)',
+      'Tax (INR)',
+      'Discount (INR)',
+      'Total Amount (INR)',
+      'Order Status',
+      'Payment Status',
+      'Payment Method',
+    ];
+
+    const csvRows = orders.map((o) => {
+      const dateObj = new Date(o.createdAt);
+      const dateStr = dateObj.toLocaleDateString();
+      const timeStr = dateObj.toLocaleTimeString();
+      const itemsStr = o.items ? o.items.map((i) => `${i.quantity}x ${i.productName}`).join(' | ') : '';
+
+      return [
+        `"#${o.orderNumber}"`,
+        `"${dateStr}"`,
+        `"${timeStr}"`,
+        `"${o.tableNumber}"`,
+        `"${(o.customerName || 'Guest Customer').replace(/"/g, '""')}"`,
+        `"${(o.customerPhone || '').replace(/"/g, '""')}"`,
+        `"${itemsStr.replace(/"/g, '""')}"`,
+        Number(o.subtotal || 0).toFixed(2),
+        Number(o.tax || 0).toFixed(2),
+        Number(o.discount || 0).toFixed(2),
+        Number(o.total || 0).toFixed(2),
+        `"${o.orderStatus}"`,
+        `"${o.paymentStatus}"`,
+        `"${o.paymentMethod}"`,
+      ];
+    });
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...csvRows.map((e) => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    const dateLabel = orderDateFilter ? orderDateFilter : orderRangeFilter || 'all-dates';
+    link.setAttribute('download', `CafeQR_Order_History_${dateLabel}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // Load tab data dynamically
   const loadTabData = async () => {
     setIsLoading(true);
@@ -116,7 +177,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         setTables(tblRes);
         setSettings(cafeRes);
       } else if (currentTab === 'orders' || currentTab === 'history') {
-        const res = await api.getAdminOrders(orderStatusFilter, orderSearchQuery, orderDateFilter);
+        const res = await api.getAdminOrders(
+          orderStatusFilter,
+          orderSearchQuery,
+          orderDateFilter,
+          undefined,
+          undefined,
+          orderDateFilter ? undefined : orderRangeFilter
+        );
         setOrders(res);
       } else if (currentTab === 'staff') {
         const res = await api.getStaff();
@@ -139,7 +207,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     } else {
       loadTabData();
     }
-  }, [currentTab, orderStatusFilter, orderSearchQuery, orderDateFilter]);
+  }, [currentTab, orderStatusFilter, orderSearchQuery, orderDateFilter, orderRangeFilter]);
 
   // Product Form Handler
   const handleSaveProduct = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -246,7 +314,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   };
 
   return (
-    <div className="flex min-h-screen bg-stone-100 font-sans">
+    <div className="flex min-h-screen bg-[#FAF7F2] text-[#1C130E] font-sans">
       {/* Sidebar */}
       <Sidebar
         currentTab={currentTab}
@@ -273,10 +341,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           {/* Error Banner */}
           {loadError && (
             <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-3">
-              <div className="w-8 h-8 bg-rose-100 text-rose-600 rounded-xl flex items-center justify-center shrink-0 font-black text-sm">!</div>
+              <div className="w-8 h-8 bg-rose-100 text-rose-700 rounded-xl flex items-center justify-center shrink-0 font-black text-sm">!</div>
               <div>
-                <p className="text-sm font-bold text-rose-800">Backend Connection Error</p>
-                <p className="text-xs text-rose-600 mt-0.5">{loadError}</p>
+                <p className="text-sm font-bold text-rose-900">Backend Connection Error</p>
+                <p className="text-xs text-rose-700 mt-0.5">{loadError}</p>
               </div>
               <button onClick={loadTabData} className="ml-auto text-xs font-bold text-rose-700 hover:text-rose-900 underline shrink-0">Retry</button>
             </div>
@@ -285,8 +353,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           {/* TAB 1: DASHBOARD */}
           {currentTab === 'dashboard' && (
             isLoading && !dashboardData ? (
-              <div className="flex flex-col items-center justify-center p-12 text-stone-400 font-semibold text-sm">
-                <div className="w-8 h-8 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mb-3" />
+              <div className="flex flex-col items-center justify-center p-12 text-stone-500 font-semibold text-sm">
+                <div className="w-8 h-8 border-4 border-[#10B981] border-t-transparent rounded-full animate-spin mb-3" />
                 Loading dashboard metrics...
               </div>
             ) : dashboardData ? (
@@ -298,7 +366,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     value={`₹${dashboardData.metrics.todaySales.toFixed(2)}`}
                     subtitle={`${dashboardData.metrics.todayOrders} orders today`}
                     icon={DollarSign}
-                    color="amber"
+                    color="emerald"
                   />
                   <StatCard
                     title="Active Orders"
@@ -308,14 +376,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     }
                     subtitle={`${dashboardData.metrics.pendingOrders} pending kitchen approval`}
                     icon={Clock}
-                    color="indigo"
+                    color="amber"
                   />
                   <StatCard
                     title="Completed Orders"
                     value={dashboardData.metrics.completedOrders}
                     subtitle={`Out of ${dashboardData.metrics.totalOrders} total orders`}
                     icon={ShoppingBag}
-                    color="emerald"
+                    color="indigo"
                   />
                   <StatCard
                     title="Menu Products"
@@ -329,8 +397,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 {/* Charts Section */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                   {/* 7-Day Revenue Trend (Recharts) */}
-                  <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-stone-200 shadow-2xs">
-                    <h3 className="text-base font-extrabold text-stone-900 mb-4">
+                  <div className="lg:col-span-2 bg-white rounded-3xl p-6 border border-[#E2DCD5] shadow-xs">
+                    <h3 className="text-base font-black text-[#1C130E] mb-4 flex items-center gap-2">
+                      <span className="w-1.5 h-4 bg-[#10B981] rounded-full inline-block" />
                       7-Day Revenue Overview
                     </h3>
                     <div className="h-72 w-full">
@@ -338,18 +407,25 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                         <AreaChart data={dashboardData.salesTrend}>
                           <defs>
                             <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="5%" stopColor="#d97706" stopOpacity={0.4} />
-                              <stop offset="95%" stopColor="#d97706" stopOpacity={0} />
+                              <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
+                              <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
                             </linearGradient>
                           </defs>
-                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                          <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} />
-                          <YAxis stroke="#94a3b8" fontSize={12} />
-                          <Tooltip />
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2DCD5" />
+                          <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
+                          <YAxis stroke="#64748b" fontSize={12} />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#FFFFFF',
+                              borderColor: '#E2DCD5',
+                              borderRadius: '16px',
+                              color: '#1C130E',
+                            }}
+                          />
                           <Area
                             type="monotone"
                             dataKey="sales"
-                            stroke="#d97706"
+                            stroke="#10B981"
                             strokeWidth={3}
                             fillOpacity={1}
                             fill="url(#salesGrad)"
@@ -360,21 +436,22 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   </div>
 
                   {/* Top Selling Products */}
-                  <div className="bg-white rounded-3xl p-6 border border-stone-200 shadow-2xs">
-                    <h3 className="text-base font-extrabold text-stone-900 mb-4">
+                  <div className="bg-white rounded-3xl p-6 border border-[#E2DCD5] shadow-xs">
+                    <h3 className="text-base font-black text-[#1C130E] mb-4 flex items-center gap-2">
+                      <span className="w-1.5 h-4 bg-[#10B981] rounded-full inline-block" />
                       Top Selling Products
                     </h3>
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {dashboardData.popularProducts.map((item: any, idx: number) => (
                         <div
                           key={idx}
-                          className="flex items-center justify-between p-3 bg-stone-50 rounded-2xl border border-stone-100"
+                          className="flex items-center justify-between p-3.5 bg-[#FAF7F2] rounded-2xl border border-[#E2DCD5]"
                         >
                           <div>
-                            <p className="text-xs font-bold text-stone-900">{item.name}</p>
-                            <p className="text-[11px] text-stone-500">{item.quantity} sold</p>
+                            <p className="text-xs font-extrabold text-stone-900">{item.name}</p>
+                            <p className="text-[11px] text-stone-500 font-medium">{item.quantity} sold</p>
                           </div>
-                          <span className="text-xs font-extrabold text-amber-700">
+                          <span className="text-xs font-black text-[#10B981]">
                             ₹{item.revenue.toFixed(2)}
                           </span>
                         </div>
@@ -390,7 +467,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           {currentTab === 'products' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="text-base font-bold text-stone-800">Menu Products List</h2>
+                <h2 className="text-base font-black text-[#1C130E] flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-[#10B981] rounded-full inline-block" />
+                  Menu Products List
+                </h2>
                 <Button
                   variant="primary"
                   onClick={() => {
@@ -398,16 +478,16 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     setIsProductModalOpen(true);
                   }}
                 >
-                  <Plus className="w-4 h-4 mr-1.5" />
+                  <Plus className="w-4 h-4 mr-1.5 font-black" />
                   <span className="hidden sm:inline">Add New Product</span>
                   <span className="sm:hidden">Add</span>
                 </Button>
               </div>
 
-              <div className="bg-white rounded-3xl border border-stone-200 shadow-2xs overflow-hidden">
+              <div className="bg-white rounded-3xl border border-[#E2DCD5] shadow-xs overflow-hidden">
                 <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-stone-700 min-w-[640px]">
-                  <thead className="bg-stone-50 border-b border-stone-200 uppercase font-bold text-stone-500">
+                  <thead className="bg-[#FAF7F2] border-b border-[#E2DCD5] uppercase font-extrabold text-stone-600">
                     <tr>
                       <th className="p-4">Item</th>
                       <th className="p-4">Category</th>
@@ -417,33 +497,33 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       <th className="p-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-100 font-medium">
+                  <tbody className="divide-y divide-[#E2DCD5] font-medium">
                     {products.map((p) => (
-                      <tr key={p.id} className="hover:bg-stone-50/80 transition-colors">
+                      <tr key={p.id} className="hover:bg-[#FAF7F2] transition-colors">
                         <td className="p-4 flex items-center gap-3">
                           {p.image && (
                             <img
                               src={p.image}
                               alt={p.name}
-                              className="w-10 h-10 rounded-xl object-cover shrink-0"
+                              className="w-10 h-10 rounded-xl object-cover shrink-0 border border-[#E2DCD5]"
                             />
                           )}
                           <div>
-                            <p className="font-bold text-stone-900">{p.name}</p>
+                            <p className="font-extrabold text-stone-900">{p.name}</p>
                             {p.isFeatured && (
-                              <span className="text-[10px] text-amber-700 font-bold">
+                              <span className="text-[10px] text-amber-700 font-extrabold">
                                 ★ Featured Special
                               </span>
                             )}
                           </div>
                         </td>
-                        <td className="p-4 font-semibold text-stone-600 whitespace-nowrap">
+                        <td className="p-4 font-bold text-stone-700 whitespace-nowrap">
                           {p.categoryName || 'Unassigned'}
                         </td>
-                        <td className="p-4 font-extrabold text-stone-900 whitespace-nowrap">₹{p.price.toFixed(2)}</td>
+                        <td className="p-4 font-black text-[#10B981] whitespace-nowrap">₹{p.price.toFixed(2)}</td>
                         <td className="p-4">
                           <span
-                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${p.isVeg ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                            className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border ${p.isVeg ? 'bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-rose-100 text-rose-900 border-rose-300'
                               }`}
                           >
                             {p.isVeg ? 'VEG' : 'NON-VEG'}
@@ -455,9 +535,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                               await api.toggleProduct(p.id);
                               loadTabData();
                             }}
-                            className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap ${p.isAvailable
-                              ? 'bg-emerald-100 text-emerald-800'
-                              : 'bg-stone-200 text-stone-600'
+                            className={`px-2.5 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap border ${p.isAvailable
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                              : 'bg-[#FAF7F2] text-stone-500 border-[#E2DCD5]'
                               }`}
                           >
                             {p.isAvailable ? <ToggleRight className="w-4 h-4 text-emerald-600" /> : <ToggleLeft className="w-4 h-4" />}
@@ -470,7 +550,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                               setEditingProduct(p);
                               setIsProductModalOpen(true);
                             }}
-                            className="p-1.5 hover:bg-stone-100 text-stone-600 rounded-lg"
+                            className="p-1.5 hover:bg-[#F5EFE6] text-stone-600 hover:text-stone-900 rounded-lg transition-colors"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
@@ -478,7 +558,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                             onClick={() =>
                               setDeleteConfirm({ type: 'product', id: p.id, name: p.name })
                             }
-                            className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg"
+                            className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -496,7 +576,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           {currentTab === 'categories' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="text-base font-bold text-stone-800">Menu Categories</h2>
+                <h2 className="text-base font-black text-[#1C130E] flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-[#10B981] rounded-full inline-block" />
+                  Menu Categories
+                </h2>
                 <Button
                   variant="primary"
                   onClick={() => {
@@ -504,7 +587,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     setIsCategoryModalOpen(true);
                   }}
                 >
-                  <Plus className="w-4 h-4 mr-1.5" />
+                  <Plus className="w-4 h-4 mr-1.5 font-black" />
                   <span className="hidden sm:inline">Add Category</span>
                   <span className="sm:hidden">Add</span>
                 </Button>
@@ -514,32 +597,32 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 {categories.map((c) => (
                   <div
                     key={c.id}
-                    className="bg-white rounded-3xl p-5 border border-stone-200 shadow-2xs flex flex-col justify-between"
+                    className="bg-white rounded-3xl p-5 border border-[#E2DCD5] shadow-xs flex flex-col justify-between"
                   >
                     <div>
                       {c.image && (
                         <img
                           src={c.image}
                           alt={c.name}
-                          className="w-full h-32 rounded-2xl object-cover mb-4"
+                          className="w-full h-32 rounded-2xl object-cover mb-4 border border-[#E2DCD5]"
                         />
                       )}
-                      <h3 className="text-base font-extrabold text-stone-900">{c.name}</h3>
+                      <h3 className="text-base font-black text-stone-900">{c.name}</h3>
                       <p className="text-xs text-stone-500 mt-1 line-clamp-2">{c.description}</p>
-                      <p className="text-xs font-bold text-amber-700 mt-3">
+                      <p className="text-xs font-black text-[#10B981] mt-3">
                         {c.productCount || 0} Products
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 mt-4 border-t border-stone-100">
-                      <span className="text-xs font-semibold text-stone-400">Order: #{c.sortOrder}</span>
+                    <div className="flex items-center justify-between pt-4 mt-4 border-t border-[#E2DCD5]">
+                      <span className="text-xs font-bold text-stone-500">Order: #{c.sortOrder}</span>
                       <div className="flex items-center gap-2">
                         <button
                           onClick={() => {
                             setEditingCategory(c);
                             setIsCategoryModalOpen(true);
                           }}
-                          className="p-1.5 hover:bg-stone-100 text-stone-600 rounded-lg"
+                          className="p-1.5 hover:bg-[#F5EFE6] text-stone-600 hover:text-stone-900 rounded-lg transition-colors"
                         >
                           <Edit2 className="w-4 h-4" />
                         </button>
@@ -547,7 +630,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                           onClick={() =>
                             setDeleteConfirm({ type: 'category', id: c.id, name: c.name })
                           }
-                          className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg"
+                          className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -563,9 +646,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           {currentTab === 'tables' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="text-base font-bold text-stone-800">Cafe Seating Tables</h2>
+                <h2 className="text-base font-black text-[#1C130E] flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-[#10B981] rounded-full inline-block" />
+                  Cafe Seating Tables
+                </h2>
                 <Button variant="primary" onClick={() => setIsTableModalOpen(true)}>
-                  <Plus className="w-4 h-4 mr-1.5" />
+                  <Plus className="w-4 h-4 mr-1.5 font-black" />
                   <span className="hidden sm:inline">Add Seating Table</span>
                   <span className="sm:hidden">Add</span>
                 </Button>
@@ -575,31 +661,31 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 {tables.map((t) => (
                   <div
                     key={t.id}
-                    className="bg-white rounded-3xl p-6 border border-stone-200 shadow-2xs flex flex-col justify-between"
+                    className="bg-white rounded-3xl p-6 border border-[#E2DCD5] shadow-xs flex flex-col justify-between"
                   >
                     <div className="flex items-center justify-between mb-4">
-                      <div className="w-12 h-12 bg-amber-100 text-amber-900 rounded-2xl flex items-center justify-center font-black text-base shadow-2xs">
+                      <div className="w-12 h-12 bg-gradient-to-br from-[#00F5D4] to-[#10B981] text-[#140D0B] rounded-2xl flex items-center justify-center font-black text-base shadow-sm">
                         {t.number.replace('Table ', '')}
                       </div>
-                      <span className="text-xs font-bold bg-stone-100 px-3 py-1 rounded-xl text-stone-600">
+                      <span className="text-xs font-bold bg-[#FAF7F2] border border-[#E2DCD5] px-3 py-1 rounded-xl text-stone-700">
                         Cap: {t.capacity} guests
                       </span>
                     </div>
 
                     <div>
                       <h3 className="text-lg font-black text-stone-900">{t.number}</h3>
-                      <p className="text-xs font-mono text-stone-400 mt-1 truncate">
+                      <p className="text-xs font-mono text-stone-500 mt-1 truncate">
                         Token: {t.qrToken}
                       </p>
                     </div>
 
-                    <div className="pt-4 mt-4 border-t border-stone-100 flex items-center justify-between">
+                    <div className="pt-4 mt-4 border-t border-[#E2DCD5] flex items-center justify-between">
                       <button
                         onClick={async () => {
                           await api.regenerateQR(t.id);
                           loadTabData();
                         }}
-                        className="text-xs text-stone-500 hover:text-amber-600 font-semibold flex items-center gap-1"
+                        className="text-xs text-stone-500 hover:text-[#10B981] font-bold flex items-center gap-1 transition-colors"
                         title="Regenerate QR Token"
                       >
                         <RefreshCw className="w-3.5 h-3.5" />
@@ -612,7 +698,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                         onClick={() => setSelectedQRTable(t)}
                         className="flex items-center gap-1.5"
                       >
-                        <QrCode className="w-4 h-4" />
+                        <QrCode className="w-4 h-4 text-[#10B981]" />
                         Print / View QR
                       </Button>
                     </div>
@@ -626,17 +712,18 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           {(currentTab === 'orders' || currentTab === 'history') && (
             <div className="space-y-6">
               {/* Header & Date Filter Toolbar */}
-              <div className="flex flex-col gap-4 bg-white p-4 sm:p-5 rounded-3xl border border-stone-200 shadow-2xs">
+              <div className="flex flex-col gap-4 bg-white p-4 sm:p-5 rounded-3xl border border-[#E2DCD5] shadow-xs">
                 <div>
-                  <h2 className="text-base font-black text-stone-900 flex items-center gap-2">
+                  <h2 className="text-base font-black text-[#1C130E] flex items-center gap-2">
+                    <span className="w-1.5 h-4 bg-[#10B981] rounded-full inline-block" />
                     {currentTab === 'history' ? (
                       <>
-                        <History className="w-5 h-5 text-amber-600" />
+                        <History className="w-5 h-5 text-[#10B981]" />
                         Order History & Historical Logs
                       </>
                     ) : (
                       <>
-                        <ShoppingBag className="w-5 h-5 text-amber-600" />
+                        <ShoppingBag className="w-5 h-5 text-[#10B981]" />
                         Live Orders Management
                       </>
                     )}
@@ -646,59 +733,115 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   </p>
                 </div>
 
-                {/* Date Picker Control & Preset Buttons */}
-                <div className="flex flex-wrap items-center gap-2 border-t border-stone-100 pt-3">
-                  <div className="flex items-center gap-2 bg-stone-50 border border-stone-200 rounded-xl px-3 py-1.5">
-                    <Calendar className="w-4 h-4 text-stone-500 shrink-0" />
-                    <input
-                      type="date"
-                      value={orderDateFilter}
-                      onChange={(e) => setOrderDateFilter(e.target.value)}
-                      className="bg-transparent text-xs font-bold text-stone-800 focus:outline-none"
-                    />
-                    {orderDateFilter && (
+                {/* Date Picker Control & Preset Buttons & Download CSV */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-t border-[#E2DCD5] pt-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-2 bg-[#FAF7F2] border border-[#E2DCD5] rounded-2xl px-3 py-1.5">
+                      <Calendar className="w-4 h-4 text-[#10B981] shrink-0" />
+                      <input
+                        type="date"
+                        value={orderDateFilter}
+                        onChange={(e) => {
+                          setOrderDateFilter(e.target.value);
+                          setOrderRangeFilter('');
+                        }}
+                        className="bg-transparent text-xs font-bold text-stone-800 focus:outline-none"
+                      />
+                      {orderDateFilter && (
+                        <button
+                          onClick={() => {
+                            setOrderDateFilter('');
+                            setOrderRangeFilter('30days');
+                          }}
+                          className="text-stone-400 hover:text-stone-700"
+                          title="Clear Date Filter"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        const todayStr = new Date().toISOString().split('T')[0];
+                        setOrderDateFilter(todayStr);
+                        setOrderRangeFilter('');
+                      }}
+                      className={`px-3 py-1.5 rounded-2xl text-xs font-bold transition-all border ${
+                        orderDateFilter === new Date().toISOString().split('T')[0]
+                          ? 'bg-[#FAF7F2] text-[#10B981] border-[#10B981]/40 font-black'
+                          : 'bg-white text-stone-600 border-[#E2DCD5] hover:bg-[#FAF7F2]'
+                      }`}
+                    >
+                      Today
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        const d = new Date();
+                        d.setDate(d.getDate() - 1);
+                        setOrderDateFilter(d.toISOString().split('T')[0]);
+                        setOrderRangeFilter('');
+                      }}
+                      className={`px-3 py-1.5 rounded-2xl text-xs font-bold transition-all border ${
+                        orderDateFilter === new Date(Date.now() - 86400000).toISOString().split('T')[0]
+                          ? 'bg-[#FAF7F2] text-[#10B981] border-[#10B981]/40 font-black'
+                          : 'bg-white text-stone-600 border-[#E2DCD5] hover:bg-[#FAF7F2]'
+                      }`}
+                    >
+                      Yesterday
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setOrderDateFilter('');
+                        setOrderRangeFilter('7days');
+                      }}
+                      className={`px-3 py-1.5 rounded-2xl text-xs font-bold transition-all border ${
+                        !orderDateFilter && orderRangeFilter === '7days'
+                          ? 'bg-[#FAF7F2] text-[#10B981] border-[#10B981]/40 font-black'
+                          : 'bg-white text-stone-600 border-[#E2DCD5] hover:bg-[#FAF7F2]'
+                      }`}
+                    >
+                      Last 7 Days
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setOrderDateFilter('');
+                        setOrderRangeFilter('30days');
+                      }}
+                      className={`px-3 py-1.5 rounded-2xl text-xs font-bold transition-all border ${
+                        !orderDateFilter && orderRangeFilter === '30days'
+                          ? 'bg-[#10B981]/15 text-[#10B981] border-[#10B981]/50 font-black shadow-2xs'
+                          : 'bg-white text-stone-600 border-[#E2DCD5] hover:bg-[#FAF7F2]'
+                      }`}
+                    >
+                      🗓️ Last 30 Days (1 Month)
+                    </button>
+
+                    {(orderDateFilter || (orderRangeFilter && orderRangeFilter !== '30days')) && (
                       <button
-                        onClick={() => setOrderDateFilter('')}
-                        className="text-stone-400 hover:text-stone-700"
-                        title="Clear Date Filter"
+                        onClick={() => {
+                          setOrderDateFilter('');
+                          setOrderRangeFilter('');
+                        }}
+                        className="px-3 py-1.5 rounded-2xl text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-all"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        Show All Dates
                       </button>
                     )}
                   </div>
 
+                  {/* Download History CSV Button */}
                   <button
-                    onClick={() => {
-                      const todayStr = new Date().toISOString().split('T')[0];
-                      setOrderDateFilter(todayStr);
-                    }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${orderDateFilter === new Date().toISOString().split('T')[0]
-                      ? 'bg-amber-100 text-amber-900 border-amber-300'
-                      : 'bg-stone-50 text-stone-600 border-stone-200 hover:bg-stone-100'
-                      }`}
+                    onClick={handleDownloadHistoryCSV}
+                    className="px-4 py-2 rounded-2xl text-xs font-black bg-[#10B981] hover:bg-[#0D9668] text-white shadow-md transition-all flex items-center gap-2 active:scale-95 shrink-0"
+                    title="Download current order history as CSV file"
                   >
-                    Today
+                    <Download className="w-4 h-4 stroke-[2.5]" />
+                    <span>Download History (CSV)</span>
                   </button>
-
-                  <button
-                    onClick={() => {
-                      const d = new Date();
-                      d.setDate(d.getDate() - 1);
-                      setOrderDateFilter(d.toISOString().split('T')[0]);
-                    }}
-                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-stone-50 text-stone-600 border border-stone-200 hover:bg-stone-100 transition-all"
-                  >
-                    Yesterday
-                  </button>
-
-                  {orderDateFilter && (
-                    <button
-                      onClick={() => setOrderDateFilter('')}
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 transition-all"
-                    >
-                      Show All Dates
-                    </button>
-                  )}
                 </div>
               </div>
 
@@ -710,9 +853,9 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       <button
                         key={st}
                         onClick={() => setOrderStatusFilter(st)}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${orderStatusFilter === st
-                          ? 'bg-amber-600 text-white shadow-xs'
-                          : 'bg-white text-stone-600 border border-stone-200'
+                        className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold transition-all border ${orderStatusFilter === st
+                          ? 'bg-[#FAF7F2] text-[#10B981] border-[#10B981]/40 font-black shadow-2xs'
+                          : 'bg-white text-stone-600 border-[#E2DCD5] hover:bg-[#FAF7F2]'
                           }`}
                       >
                         {st}
@@ -722,13 +865,13 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                 </div>
 
                 <div className="relative w-full md:w-64">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
                   <input
                     type="text"
                     value={orderSearchQuery}
                     onChange={(e) => setOrderSearchQuery(e.target.value)}
                     placeholder="Search by order/phone/table..."
-                    className="w-full bg-white border border-stone-200 rounded-xl pl-9 pr-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500"
+                    className="w-full bg-white border border-[#E2DCD5] rounded-2xl pl-10 pr-3.5 py-2 text-xs text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-[#10B981]/20 focus:border-[#10B981]"
                   />
                 </div>
               </div>
@@ -749,10 +892,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
               )}
 
               {/* Orders Table */}
-              <div className="bg-white rounded-3xl border border-stone-200 shadow-2xs overflow-hidden">
+              <div className="bg-white rounded-3xl border border-[#E2DCD5] shadow-xs overflow-hidden">
                 <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-stone-700 min-w-[700px]">
-                  <thead className="bg-stone-50 border-b border-stone-200 uppercase font-bold text-stone-500">
+                  <thead className="bg-[#FAF7F2] border-b border-[#E2DCD5] uppercase font-extrabold text-stone-600">
                     <tr>
                       <th className="p-4">Order #</th>
                       <th className="p-4">Date & Time</th>
@@ -764,17 +907,17 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       <th className="p-4 text-right">Update Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-100 font-medium">
+                  <tbody className="divide-y divide-[#E2DCD5] font-medium">
                     {orders.length === 0 ? (
                       <tr>
-                        <td colSpan={8} className="p-8 text-center text-stone-400 font-semibold">
+                        <td colSpan={8} className="p-8 text-center text-stone-500 font-semibold">
                           No orders found matching your date or filter criteria.
                         </td>
                       </tr>
                     ) : (
                       orders.map((o) => (
-                        <tr key={o.id} className="hover:bg-stone-50/80 transition-colors">
-                          <td className="p-4 font-bold text-stone-900 whitespace-nowrap">#{o.orderNumber}</td>
+                        <tr key={o.id} className="hover:bg-[#FAF7F2] transition-colors">
+                          <td className="p-4 font-extrabold text-stone-900 whitespace-nowrap">#{o.orderNumber}</td>
                           <td className="p-4 text-stone-500 whitespace-nowrap">
                             {new Date(o.createdAt).toLocaleDateString([], {
                               month: 'short',
@@ -788,12 +931,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                               })}
                             </span>
                           </td>
-                          <td className="p-4 font-semibold text-amber-700 whitespace-nowrap">{o.tableNumber}</td>
-                          <td className="p-4 whitespace-nowrap">{o.customerName || 'Guest'}</td>
-                          <td className="p-4 max-w-[180px] truncate">
+                          <td className="p-4 font-bold text-[#10B981] whitespace-nowrap">{o.tableNumber}</td>
+                          <td className="p-4 whitespace-nowrap text-stone-800">{o.customerName || 'Guest'}</td>
+                          <td className="p-4 max-w-[180px] truncate text-stone-700">
                             {o.items.map((i) => `${i.quantity}x ${i.productName}`).join(', ')}
                           </td>
-                          <td className="p-4 font-black text-stone-900 whitespace-nowrap">₹{o.total.toFixed(2)}</td>
+                          <td className="p-4 font-black text-[#10B981] whitespace-nowrap">₹{o.total.toFixed(2)}</td>
                           <td className="p-4">
                             <StatusBadge status={o.orderStatus} />
                           </td>
@@ -804,14 +947,14 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                                 await api.updateOrderStatus(o.id, e.target.value);
                                 loadTabData();
                               }}
-                              className="bg-stone-50 border border-stone-300 rounded-xl px-2 py-1 text-xs font-bold text-stone-800 focus:outline-none"
+                              className="bg-[#FAF7F2] border border-[#E2DCD5] rounded-xl px-2.5 py-1 text-xs font-bold text-stone-800 focus:outline-none focus:border-[#10B981]"
                             >
-                              <option value="PENDING">PENDING</option>
-                              <option value="ACCEPTED">ACCEPTED</option>
-                              <option value="PREPARING">PREPARING</option>
-                              <option value="READY">READY</option>
-                              <option value="COMPLETED">COMPLETED</option>
-                              <option value="CANCELLED">CANCELLED</option>
+                              <option value="PENDING" className="bg-white text-stone-800">PENDING</option>
+                              <option value="ACCEPTED" className="bg-white text-stone-800">ACCEPTED</option>
+                              <option value="PREPARING" className="bg-white text-stone-800">PREPARING</option>
+                              <option value="READY" className="bg-white text-stone-800">READY</option>
+                              <option value="COMPLETED" className="bg-white text-stone-800">COMPLETED</option>
+                              <option value="CANCELLED" className="bg-white text-stone-800">CANCELLED</option>
                             </select>
                           </td>
                         </tr>
@@ -828,18 +971,21 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           {currentTab === 'staff' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="text-base font-bold text-stone-800">Staff Accounts</h2>
+                <h2 className="text-base font-black text-[#1C130E] flex items-center gap-2">
+                  <span className="w-1.5 h-4 bg-[#10B981] rounded-full inline-block" />
+                  Staff Accounts
+                </h2>
                 <Button variant="primary" onClick={() => setIsStaffModalOpen(true)}>
-                  <Plus className="w-4 h-4 mr-1.5" />
+                  <Plus className="w-4 h-4 mr-1.5 font-black" />
                   <span className="hidden sm:inline">Add Staff Account</span>
                   <span className="sm:hidden">Add</span>
                 </Button>
               </div>
 
-              <div className="bg-white rounded-3xl border border-stone-200 shadow-2xs overflow-hidden">
+              <div className="bg-white rounded-3xl border border-[#E2DCD5] shadow-xs overflow-hidden">
                 <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs text-stone-700 min-w-[560px]">
-                  <thead className="bg-stone-50 border-b border-stone-200 uppercase font-bold text-stone-500">
+                  <thead className="bg-[#FAF7F2] border-b border-[#E2DCD5] uppercase font-extrabold text-stone-600">
                     <tr>
                       <th className="p-4">Name</th>
                       <th className="p-4">Email</th>
@@ -849,28 +995,28 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                       <th className="p-4 text-right">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-stone-100 font-medium">
+                  <tbody className="divide-y divide-[#E2DCD5] font-medium">
                     {staff.map((s, index) => (
-                      <tr key={s.id} className="hover:bg-stone-50/80 transition-colors">
-                        <td className="p-4 font-bold text-stone-900">{s.name}</td>
+                      <tr key={s.id} className="hover:bg-[#FAF7F2] transition-colors">
+                        <td className="p-4 font-black text-stone-900">{s.name}</td>
                         <td className="p-4 font-mono text-stone-600">{s.email}</td>
                         <td className="p-4">
                           <span
-                            className={`px-2.5 py-1 rounded-xl text-[10px] font-bold ${s.role === 'ADMIN'
-                              ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                              : 'bg-blue-100 text-blue-800 border border-blue-200'
+                            className={`px-2.5 py-1 rounded-full text-[10px] font-black border ${s.role === 'ADMIN'
+                              ? 'bg-amber-100 text-amber-900 border-amber-300'
+                              : 'bg-blue-100 text-blue-900 border-blue-300'
                               }`}
                           >
                             {s.role}
                           </span>
                         </td>
                         <td className="p-4">
-                          <span className="bg-stone-900 text-amber-400 font-mono text-xs font-black px-2.5 py-1 rounded-xl shadow-2xs inline-flex items-center gap-1.5 border border-stone-800">
-                            <IdCard className="w-3.5 h-3.5 text-amber-500" />
+                          <span className="bg-[#FAF7F2] text-[#10B981] font-mono text-xs font-black px-2.5 py-1 rounded-xl shadow-2xs inline-flex items-center gap-1.5 border border-[#E2DCD5]">
+                            <IdCard className="w-3.5 h-3.5 text-[#10B981]" />
                             {s.staffId || `STF-${(101 + index).toString().padStart(3, '0')}`}
                           </span>
                         </td>
-                        <td className="p-4 text-stone-400">
+                        <td className="p-4 text-stone-500">
                           {s.createdAt
                             ? new Date(s.createdAt).toLocaleDateString([], {
                               month: 'short',
@@ -890,7 +1036,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                               <span>Delete</span>
                             </button>
                           ) : (
-                            <span className="text-[11px] text-stone-400 font-semibold italic bg-stone-100 px-2 py-1 rounded-lg">
+                            <span className="text-[11px] text-stone-500 font-semibold italic bg-[#FAF7F2] border border-[#E2DCD5] px-2.5 py-1 rounded-lg">
                               Current User
                             </span>
                           )}
@@ -906,8 +1052,11 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
           {/* TAB 7: SETTINGS */}
           {currentTab === 'settings' && settings && (
-            <div className="max-w-2xl bg-white rounded-3xl p-5 sm:p-8 border border-stone-200 shadow-2xs">
-              <h2 className="text-lg font-black text-stone-900 mb-6">Cafe Configuration Settings</h2>
+            <div className="max-w-2xl bg-white rounded-3xl p-5 sm:p-8 border border-[#E2DCD5] shadow-xs">
+              <h2 className="text-lg font-black text-[#1C130E] mb-6 flex items-center gap-2">
+                <span className="w-1.5 h-5 bg-[#10B981] rounded-full inline-block" />
+                Cafe Configuration Settings
+              </h2>
               <form onSubmit={handleSaveSettings} className="space-y-4">
                 <Input label="Cafe Name" name="name" defaultValue={settings.name} required />
                 <Input label="Logo Image URL" name="logo" defaultValue={settings.logo || ''} />
@@ -927,7 +1076,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                   <Input label="Currency Symbol" name="currency" defaultValue={settings.currency} required />
                 </div>
 
-                <Button variant="primary" type="submit" className="py-3 text-sm">
+                <Button variant="primary" type="submit" className="py-3 text-sm font-extrabold w-full sm:w-auto">
                   Save Store Settings
                 </Button>
               </form>
@@ -945,15 +1094,15 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       >
         <form onSubmit={handleSaveProduct} className="space-y-4 text-xs">
           <div>
-            <label className="block font-bold text-stone-600 mb-1">Category</label>
+            <label className="block font-bold uppercase tracking-wider text-stone-400 mb-1.5">Category</label>
             <select
               name="categoryId"
               defaultValue={editingProduct?.categoryId || categories[0]?.id}
-              className="w-full bg-white border border-stone-200 rounded-xl p-2.5"
+              className="w-full bg-[#1F1512] border border-[#38241D] rounded-2xl p-2.5 text-stone-100 focus:outline-none focus:border-[#00F5D4]"
               required
             >
               {categories.map((c) => (
-                <option key={c.id} value={c.id}>
+                <option key={c.id} value={c.id} className="bg-[#1F1512] text-stone-100">
                   {c.name}
                 </option>
               ))}
@@ -987,27 +1136,30 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           />
 
           <div className="flex items-center gap-6 pt-2">
-            <label className="flex items-center gap-2 font-bold cursor-pointer">
+            <label className="flex items-center gap-2 font-bold text-stone-300 cursor-pointer">
               <input
                 type="checkbox"
                 name="isVeg"
                 defaultChecked={editingProduct ? editingProduct.isVeg : true}
+                className="accent-[#00F5D4] w-4 h-4 rounded"
               />
               Is Veg
             </label>
-            <label className="flex items-center gap-2 font-bold cursor-pointer">
+            <label className="flex items-center gap-2 font-bold text-stone-300 cursor-pointer">
               <input
                 type="checkbox"
                 name="isAvailable"
                 defaultChecked={editingProduct ? editingProduct.isAvailable : true}
+                className="accent-[#00F5D4] w-4 h-4 rounded"
               />
               Is Available
             </label>
-            <label className="flex items-center gap-2 font-bold cursor-pointer">
+            <label className="flex items-center gap-2 font-bold text-stone-300 cursor-pointer">
               <input
                 type="checkbox"
                 name="isFeatured"
                 defaultChecked={editingProduct?.isFeatured}
+                className="accent-[#00F5D4] w-4 h-4 rounded"
               />
               Featured Special
             </label>
@@ -1044,11 +1196,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
             type="number"
             defaultValue={editingCategory?.sortOrder || 0}
           />
-          <label className="flex items-center gap-2 font-bold cursor-pointer">
+          <label className="flex items-center gap-2 font-bold text-stone-300 cursor-pointer">
             <input
               type="checkbox"
               name="isActive"
               defaultChecked={editingCategory ? editingCategory.isActive : true}
+              className="accent-[#00F5D4] w-4 h-4 rounded"
             />
             Active Category
           </label>
@@ -1101,12 +1254,12 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         title="Add Staff Account"
       >
         <form onSubmit={handleCreateStaff} className="space-y-4 text-xs">
-          <div className="p-3 bg-stone-900 text-stone-200 rounded-2xl flex items-center justify-between shadow-xs">
+          <div className="p-3 bg-[#2A1D18] border border-[#38241D] text-stone-200 rounded-2xl flex items-center justify-between">
             <span className="text-[11px] font-bold text-stone-400 flex items-center gap-1.5">
-              <IdCard className="w-4 h-4 text-amber-500" />
+              <IdCard className="w-4 h-4 text-[#00F5D4]" />
               Staff ID Generation:
             </span>
-            <span className="font-mono font-black text-amber-400 text-xs px-2.5 py-1 bg-stone-800 rounded-xl border border-stone-700">
+            <span className="font-mono font-black text-[#00F5D4] text-xs px-2.5 py-1 bg-[#1F1512] rounded-xl border border-[#38241D]">
               Auto-Generated (e.g. STF-{(101 + staff.length).toString().padStart(3, '0')})
             </span>
           </div>
@@ -1114,10 +1267,10 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
           <Input label="Email Address" name="email" type="email" required />
           <Input label="Password" name="password" type="password" required />
           <div>
-            <label className="block font-bold text-stone-600 mb-1">Assigned Role</label>
-            <select name="role" className="w-full bg-white border border-stone-200 rounded-xl p-2.5">
-              <option value="ADMIN">ADMIN</option>
-              <option value="KITCHEN">KITCHEN</option>
+            <label className="block font-bold uppercase tracking-wider text-stone-400 mb-1.5">Assigned Role</label>
+            <select name="role" className="w-full bg-[#1F1512] border border-[#38241D] rounded-2xl p-2.5 text-stone-100 focus:outline-none focus:border-[#00F5D4]">
+              <option value="ADMIN" className="bg-[#1F1512] text-stone-100">ADMIN</option>
+              <option value="KITCHEN" className="bg-[#1F1512] text-stone-100">KITCHEN</option>
             </select>
           </div>
           <div className="flex justify-end gap-2 pt-4">

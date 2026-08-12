@@ -36,11 +36,20 @@ export const KitchenKDSPage: React.FC<KitchenKDSPageProps> = ({
   }, []);
 
   const handleAdvanceStatus = async (orderId: string, nextStatus: string) => {
+    // Optimistic UI state update
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === orderId || o.orderToken === orderId
+          ? { ...o, orderStatus: nextStatus as any }
+          : o
+      )
+    );
     try {
       await api.advanceKitchenStatus(orderId, nextStatus);
       fetchKitchenOrders();
     } catch (err) {
       console.error('Failed to advance order status:', err);
+      fetchKitchenOrders(); // Revert back on error
     }
   };
 
@@ -54,29 +63,32 @@ export const KitchenKDSPage: React.FC<KitchenKDSPageProps> = ({
   ];
 
   return (
-    <div className="min-h-screen bg-stone-900 text-stone-100 flex flex-col">
+    <div className="min-h-screen bg-[#FAF7F2] text-[#1C130E] flex flex-col font-sans">
       {/* Top KDS Bar */}
-      <header className="bg-stone-950 border-b border-stone-800 px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between sticky top-0 z-20 gap-3">
+      <header className="bg-white border-b border-[#E2DCD5] px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between sticky top-0 z-20 gap-3 shadow-xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-extrabold shadow-md shrink-0">
-            <ChefHat className="w-6 h-6" />
+          <div className="h-10 px-2 bg-[#251713] border border-[#4A3228] rounded-2xl flex items-center justify-center shadow-md shrink-0">
+            <img src="/logo.png" alt="TeaWala Logo" className="h-7 w-auto object-contain" />
           </div>
           <div>
-            <h1 className="text-base sm:text-lg font-black text-white leading-tight">Kitchen Display System</h1>
-            <p className="text-[11px] text-amber-500 font-semibold">Real-Time Kitchen Queue</p>
+            <h1 className="text-base sm:text-lg font-black text-[#1C130E] leading-tight flex items-center gap-2">
+              <span className="w-1.5 h-4 bg-[#10B981] rounded-full inline-block" />
+              Kitchen Display System
+            </h1>
+            <p className="text-[11px] text-[#10B981] font-bold tracking-wide">Real-Time Kitchen Queue</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2 ml-auto">
           {onNavigateToAdmin && user?.role === 'ADMIN' && (
-            <Button variant="ghost" size="sm" onClick={onNavigateToAdmin} className="text-stone-300 text-xs px-2.5">
-              <ArrowLeft className="w-4 h-4 sm:mr-1" />
+            <Button variant="ghost" size="sm" onClick={onNavigateToAdmin} className="text-stone-600 hover:text-stone-900 text-xs px-3">
+              <ArrowLeft className="w-4 h-4 sm:mr-1 text-[#10B981]" />
               <span className="hidden sm:inline">Admin</span>
             </Button>
           )}
 
           {onNavigateToMenu && (
-            <Button variant="ghost" size="sm" onClick={onNavigateToMenu} className="text-amber-400 font-bold hover:text-amber-300 text-xs px-2.5">
+            <Button variant="outline" size="sm" onClick={onNavigateToMenu} className="text-stone-700 border-[#D4C9BD] font-bold hover:bg-[#F5EFE6] text-xs px-3">
               <ExternalLink className="w-4 h-4 sm:mr-1" />
               <span className="hidden sm:inline">Menu</span>
             </Button>
@@ -84,7 +96,7 @@ export const KitchenKDSPage: React.FC<KitchenKDSPageProps> = ({
 
           <button
             onClick={fetchKitchenOrders}
-            className="p-2 bg-stone-900 hover:bg-stone-800 text-stone-300 hover:text-white rounded-xl border border-stone-800 transition-colors"
+            className="p-2 bg-[#F5EFE6] hover:bg-[#EAE2D5] text-[#10B981] rounded-2xl border border-[#E2DCD5] transition-colors"
             title="Refresh Live Orders"
           >
             <RefreshCw className="w-4 h-4" />
@@ -92,7 +104,7 @@ export const KitchenKDSPage: React.FC<KitchenKDSPageProps> = ({
 
           <button
             onClick={onLogout}
-            className="p-2 bg-stone-900 hover:bg-rose-950/40 text-stone-400 hover:text-rose-400 rounded-xl border border-stone-800 transition-colors"
+            className="p-2 bg-[#F5EFE6] hover:bg-rose-100 text-stone-500 hover:text-rose-600 rounded-2xl border border-[#E2DCD5] transition-colors"
             title="Logout Staff"
           >
             <LogOut className="w-4 h-4" />
@@ -101,13 +113,13 @@ export const KitchenKDSPage: React.FC<KitchenKDSPageProps> = ({
       </header>
 
       {/* Mobile Stage Filter Tabs (Visible on Mobile Screens) */}
-      <div className="lg:hidden bg-stone-950/90 border-b border-stone-800 px-4 py-2 flex items-center gap-2 overflow-x-auto no-scrollbar">
+      <div className="lg:hidden bg-white border-b border-[#E2DCD5] px-4 py-2 flex items-center gap-2 overflow-x-auto no-scrollbar">
         <button
           onClick={() => setSelectedMobileTab('ALL')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all ${
+          className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all ${
             selectedMobileTab === 'ALL'
-              ? 'bg-amber-600 text-white'
-              : 'bg-stone-800 text-stone-400'
+              ? 'bg-gradient-to-r from-[#10B981] to-[#059669] text-white font-extrabold shadow-sm'
+              : 'bg-[#F5EFE6] text-stone-600 border border-[#E2DCD5]'
           }`}
         >
           All Stages ({orders.length})
@@ -118,10 +130,10 @@ export const KitchenKDSPage: React.FC<KitchenKDSPageProps> = ({
             <button
               key={col.key}
               onClick={() => setSelectedMobileTab(col.key)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 ${
+              className={`px-3.5 py-1.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 border ${
                 selectedMobileTab === col.key
-                  ? 'bg-amber-600 text-white'
-                  : 'bg-stone-800 text-stone-400'
+                  ? 'bg-[#F5EFE6] text-[#10B981] border-[#10B981]/40 font-black'
+                  : 'bg-white text-stone-600 border-[#E2DCD5]'
               }`}
             >
               <span className={`w-2 h-2 rounded-full ${col.color}`} />
@@ -141,17 +153,17 @@ export const KitchenKDSPage: React.FC<KitchenKDSPageProps> = ({
               return (
                 <div
                   key={col.key}
-                  className="bg-stone-950/70 rounded-3xl p-4 border border-stone-800 flex flex-col"
+                  className="bg-[#F5EFE6]/70 rounded-3xl p-4 border border-[#E2DCD5] flex flex-col shadow-xs"
                 >
                   {/* Column Header */}
-                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-stone-800">
+                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#E2DCD5]">
                     <div className="flex items-center gap-2">
                       <span className={`w-3 h-3 rounded-full ${col.color}`} />
-                      <h2 className="text-sm font-black uppercase tracking-wider text-stone-200">
+                      <h2 className="text-xs font-black uppercase tracking-wider text-[#1C130E] flex items-center gap-1.5">
                         {col.title}
                       </h2>
                     </div>
-                    <span className="px-2.5 py-0.5 rounded-full bg-stone-800 text-stone-300 text-xs font-bold">
+                    <span className="px-2.5 py-0.5 rounded-full bg-white border border-[#E2DCD5] text-[#10B981] text-xs font-black shadow-2xs">
                       {colOrders.length}
                     </span>
                   </div>
@@ -159,7 +171,7 @@ export const KitchenKDSPage: React.FC<KitchenKDSPageProps> = ({
                   {/* Column Cards List */}
                   <div className="flex-1 space-y-4 overflow-y-auto max-h-[calc(100vh-220px)] pr-1">
                     {colOrders.length === 0 ? (
-                      <div className="text-center py-10 text-stone-600 text-xs font-semibold">
+                      <div className="text-center py-10 text-stone-500 text-xs font-semibold">
                         No orders in this stage
                       </div>
                     ) : (

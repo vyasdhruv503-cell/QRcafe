@@ -9,11 +9,10 @@ async function ensureAuthToken(role: 'KITCHEN' | 'ADMIN' = 'KITCHEN'): Promise<s
   const token = localStorage.getItem('cafeqr_token');
   const userStr = localStorage.getItem('cafeqr_user');
 
-  // Only reuse saved token if it belongs to the correct role
   if (token && userStr) {
     try {
       const savedUser = JSON.parse(userStr);
-      if (savedUser.role === role) return token;
+      if (savedUser.role === 'ADMIN' || savedUser.role === role) return token;
     } catch {
       // Malformed stored user — fall through to re-auth
     }
@@ -58,7 +57,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 // Fallback Datasets for Demo Resilience
 const MOCK_CAFE: CafeInfo = {
   id: 'cafe_1',
-  name: 'My Cafe',
+  name: 'TeaWala',
   logo: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500&auto=format&fit=crop&q=80',
   address: '123 Gourmet Street, Culinary Quarter',
   phone: '+1 (555) 234-5678',
@@ -68,16 +67,30 @@ const MOCK_CAFE: CafeInfo = {
   openHours: '8:00 AM - 10:00 PM',
 };
 
-let MOCK_TABLES: TableInfo[] = [
+const loadSavedOrInitial = <T>(key: string, defaults: T): T => {
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored) return JSON.parse(stored);
+  } catch (e) {}
+  return defaults;
+};
+
+const saveMockState = (key: string, data: any) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch (e) {}
+};
+
+let MOCK_TABLES: TableInfo[] = loadSavedOrInitial('cafeqr_mock_tables', [
   { id: 'tbl_1', number: 'Table 01', capacity: 4, qrToken: 'tok_table01_demo', isActive: true },
   { id: 'tbl_2', number: 'Table 02', capacity: 2, qrToken: 'tok_table02_demo', isActive: true },
   { id: 'tbl_3', number: 'Table 03', capacity: 4, qrToken: 'tok_table03_demo', isActive: true },
   { id: 'tbl_4', number: 'Table 04', capacity: 6, qrToken: 'tok_table04_demo', isActive: true },
   { id: 'tbl_5', number: 'Table 05', capacity: 4, qrToken: 'tok_table05_demo', isActive: true },
   { id: 'tbl_6', number: 'Table 06', capacity: 8, qrToken: 'tok_table06_demo', isActive: true },
-];
+]);
 
-let MOCK_CATEGORIES: Category[] = [
+let MOCK_CATEGORIES: Category[] = loadSavedOrInitial('cafeqr_mock_categories', [
   { id: 'cat_1', name: 'Pizza', description: 'Artisanal wood-fired pizzas', sortOrder: 1, productCount: 3, isActive: true },
   { id: 'cat_2', name: 'Burger', description: 'Gourmet smashed burgers', sortOrder: 2, productCount: 3, isActive: true },
   { id: 'cat_3', name: 'Sandwich', description: 'Fresh paninis & club sandwiches', sortOrder: 3, productCount: 3, isActive: true },
@@ -85,9 +98,9 @@ let MOCK_CATEGORIES: Category[] = [
   { id: 'cat_5', name: 'Main Course', description: 'Hearty bowls & pastas', sortOrder: 5, productCount: 3, isActive: true },
   { id: 'cat_6', name: 'Drinks', description: 'Coffees & refreshers', sortOrder: 6, productCount: 3, isActive: true },
   { id: 'cat_7', name: 'Desserts', description: 'Decadent cakes & pastries', sortOrder: 7, productCount: 3, isActive: true },
-];
+]);
 
-let MOCK_PRODUCTS: Product[] = [
+let MOCK_PRODUCTS: Product[] = loadSavedOrInitial('cafeqr_mock_products', [
   { id: 'prod_1', categoryId: 'cat_1', categoryName: 'Pizza', name: 'Margherita Supreme', description: 'San Marzano sauce, fresh mozzarella & basil.', price: 349.0, image: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 18 },
   { id: 'prod_2', categoryId: 'cat_1', categoryName: 'Pizza', name: 'Pepperoni Feast', description: 'Loaded with double crispy pepperoni slices.', price: 429.0, image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=500&auto=format&fit=crop&q=80', isVeg: false, isFeatured: true, isAvailable: true, preparationTime: 20 },
   { id: 'prod_3', categoryId: 'cat_2', categoryName: 'Burger', name: 'Classic Smash Cheeseburger', description: 'Double Angus beef patties, melted cheese & pickles.', price: 289.0, image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop&q=80', isVeg: false, isFeatured: true, isAvailable: true, preparationTime: 15 },
@@ -95,15 +108,15 @@ let MOCK_PRODUCTS: Product[] = [
   { id: 'prod_5', categoryId: 'cat_4', categoryName: 'Starters', name: 'Truffle Parmesan Loaded Fries', description: 'Truffle oil, parmesan & parsley.', price: 189.0, image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 10 },
   { id: 'prod_6', categoryId: 'cat_6', categoryName: 'Drinks', name: 'Iced Vanilla Bean Latte', description: 'Double espresso with chilled oat milk & vanilla.', price: 149.0, image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 5 },
   { id: 'prod_7', categoryId: 'cat_7', categoryName: 'Desserts', name: 'Molten Belgian Lava Cake', description: 'Warm chocolate cake with oozing center.', price: 219.0, image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 12 },
-];
+]);
 
 let MOCK_STAFF: AuthUser[] = [
-  { id: 'usr_1', staffId: 'STF-101', name: 'Cafe Admin Manager', email: 'admin@cafeqr.com', role: 'ADMIN', cafeId: 'cafe_1', cafeName: 'My Cafe', currency: '₹', createdAt: new Date().toISOString() },
-  { id: 'usr_2', staffId: 'STF-102', name: 'Head Chef', email: 'kitchen@cafeqr.com', role: 'KITCHEN', cafeId: 'cafe_1', cafeName: 'My Cafe', currency: '₹', createdAt: new Date().toISOString() },
+  { id: 'usr_1', staffId: 'STF-101', name: 'Cafe Admin Manager', email: 'admin@cafeqr.com', role: 'ADMIN', cafeId: 'cafe_1', cafeName: 'TeaWala', currency: '₹', createdAt: new Date().toISOString() },
+  { id: 'usr_2', staffId: 'STF-102', name: 'Head Chef', email: 'kitchen@cafeqr.com', role: 'KITCHEN', cafeId: 'cafe_1', cafeName: 'TeaWala', currency: '₹', createdAt: new Date().toISOString() },
 ];
 
 const loadInitialMockOrders = (): OrderRecord[] => {
-  const initial: OrderRecord[] = [
+  const initialDefaults: OrderRecord[] = [
     {
       id: 'ord_105',
       orderNumber: 105,
@@ -147,22 +160,31 @@ const loadInitialMockOrders = (): OrderRecord[] => {
   ];
 
   try {
+    const savedMockOrders = localStorage.getItem('cafeqr_mock_orders');
     const storedObj = JSON.parse(localStorage.getItem('cafeqr_customer_orders_data') || '{}');
     const storedList = Object.values(storedObj) as OrderRecord[];
-    if (storedList.length > 0) {
-      const map = new Map<string, OrderRecord>();
-      storedList.forEach((o) => {
+
+    const map = new Map<string, OrderRecord>();
+
+    if (savedMockOrders) {
+      const parsedMock = JSON.parse(savedMockOrders) as OrderRecord[];
+      parsedMock.forEach((o) => {
         if (o && (o.orderToken || o.id)) map.set(o.orderToken || o.id, o);
       });
-      initial.forEach((o) => {
-        if (!map.has(o.orderToken || o.id)) map.set(o.orderToken || o.id, o);
-      });
-      return Array.from(map.values());
     }
+
+    storedList.forEach((o) => {
+      if (o && (o.orderToken || o.id)) map.set(o.orderToken || o.id, o);
+    });
+
+    initialDefaults.forEach((o) => {
+      if (!map.has(o.orderToken || o.id)) map.set(o.orderToken || o.id, o);
+    });
+
+    return Array.from(map.values());
   } catch (e) {
-    // Ignore error
+    return initialDefaults;
   }
-  return initial;
 };
 
 let MOCK_ORDERS: OrderRecord[] = loadInitialMockOrders();
@@ -302,6 +324,10 @@ export const api = {
       const storedTokens: string[] = JSON.parse(localStorage.getItem('cafeqr_customer_orders') || '[]');
       const storedOrdersObj: Record<string, OrderRecord> = JSON.parse(localStorage.getItem('cafeqr_customer_orders_data') || '{}');
 
+      if (storedTokens.length === 0 && Object.keys(storedOrdersObj).length === 0) {
+        return [];
+      }
+
       const orderPromises = storedTokens.map(async (token) => {
         try {
           return await this.trackOrder(token);
@@ -314,17 +340,29 @@ export const api = {
       const localStoredOrders = Object.values(storedOrdersObj);
 
       const orderMap = new Map<string, OrderRecord>();
-      [...fetchedOrders, ...localStoredOrders, ...MOCK_ORDERS].forEach((ord) => {
+      [...fetchedOrders, ...localStoredOrders].forEach((ord) => {
         if (ord && (ord.orderToken || ord.id)) {
           orderMap.set(ord.orderToken || ord.id, ord);
         }
       });
 
       const historyList = Array.from(orderMap.values());
-      return historyList.length > 0 ? historyList : MOCK_ORDERS;
+      // Sort newest orders first
+      return historyList.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
     } catch (e) {
       console.warn('Error fetching customer order history:', e);
-      return MOCK_ORDERS;
+      return [];
+    }
+  },
+
+  clearCustomerOrderHistory(): void {
+    try {
+      localStorage.removeItem('cafeqr_customer_orders');
+      localStorage.removeItem('cafeqr_customer_orders_data');
+    } catch (e) {
+      console.warn('Could not clear local order history:', e);
     }
   },
 
@@ -664,25 +702,27 @@ export const api = {
   },
 
   // Admin Orders
-  async getAdminOrders(status?: string, search?: string, date?: string): Promise<OrderRecord[]> {
+  async getAdminOrders(
+    status?: string,
+    search?: string,
+    date?: string,
+    startDate?: string,
+    endDate?: string,
+    range?: string
+  ): Promise<OrderRecord[]> {
     try {
       const params = new URLSearchParams();
       if (status && status !== 'ALL') params.append('status', status);
       if (search) params.append('search', search);
       if (date) params.append('date', date);
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      if (range) params.append('range', range);
 
       const headers = await getAuthHeaders('ADMIN');
       const res = await fetch(`${API_BASE_URL}/admin/orders?${params.toString()}`, { headers });
       const apiOrders = await handleResponse<OrderRecord[]>(res);
-      
-      const orderMap = new Map<string, OrderRecord>();
-      (Array.isArray(apiOrders) ? apiOrders : []).forEach((o) => orderMap.set(o.id || o.orderToken, o));
-      MOCK_ORDERS.forEach((o) => {
-        if (!orderMap.has(o.id) && !orderMap.has(o.orderToken)) {
-          orderMap.set(o.orderToken || o.id, o);
-        }
-      });
-      return Array.from(orderMap.values());
+      return Array.isArray(apiOrders) ? apiOrders : [];
     } catch (err) {
       console.warn('Admin orders endpoint failed, returning local orders:', err);
       return MOCK_ORDERS;
@@ -690,6 +730,23 @@ export const api = {
   },
 
   async updateOrderStatus(id: string, orderStatus: string, paymentStatus?: string): Promise<OrderRecord> {
+    const updateLocalOrder = (ord: OrderRecord) => {
+      try {
+        const storedOrdersObj = JSON.parse(localStorage.getItem('cafeqr_customer_orders_data') || '{}');
+        const tokenKey = ord.orderToken || ord.id;
+        storedOrdersObj[tokenKey] = {
+          ...storedOrdersObj[tokenKey],
+          ...ord,
+          orderStatus: orderStatus as any,
+          ...(paymentStatus && { paymentStatus: paymentStatus as any }),
+        };
+        localStorage.setItem('cafeqr_customer_orders_data', JSON.stringify(storedOrdersObj));
+        saveMockState('cafeqr_mock_orders', MOCK_ORDERS);
+      } catch (e) {
+        console.warn('Could not persist updated order status to localStorage:', e);
+      }
+    };
+
     try {
       const res = await fetch(`${API_BASE_URL}/admin/orders/${id}/status`, {
         method: 'PATCH',
@@ -701,12 +758,14 @@ export const api = {
       if (idx !== -1) {
         MOCK_ORDERS[idx] = { ...MOCK_ORDERS[idx], ...updated };
       }
+      updateLocalOrder(updated);
       return updated;
     } catch (err) {
       const idx = MOCK_ORDERS.findIndex((o) => o.id === id || o.orderToken === id);
       if (idx !== -1) {
         MOCK_ORDERS[idx].orderStatus = orderStatus as any;
         if (paymentStatus) MOCK_ORDERS[idx].paymentStatus = paymentStatus as any;
+        updateLocalOrder(MOCK_ORDERS[idx]);
         return MOCK_ORDERS[idx];
       }
       throw err;
@@ -785,15 +844,7 @@ export const api = {
       const headers = await getAuthHeaders('KITCHEN');
       const res = await fetch(`${API_BASE_URL}/kitchen/orders`, { headers });
       const apiOrders = await handleResponse<OrderRecord[]>(res);
-
-      const orderMap = new Map<string, OrderRecord>();
-      (Array.isArray(apiOrders) ? apiOrders : []).forEach((o) => orderMap.set(o.id || o.orderToken, o));
-      MOCK_ORDERS.forEach((o) => {
-        if (!orderMap.has(o.id) && !orderMap.has(o.orderToken)) {
-          orderMap.set(o.orderToken || o.id, o);
-        }
-      });
-      return Array.from(orderMap.values());
+      return Array.isArray(apiOrders) ? apiOrders : [];
     } catch (err) {
       console.warn('Kitchen orders endpoint failed, returning local orders:', err);
       return MOCK_ORDERS;

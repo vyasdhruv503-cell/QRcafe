@@ -420,7 +420,7 @@ export const generateQRCodeDataUrl = async (req: Request, res: Response, next: N
 export const getAdminOrders = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const cafeId = req.user!.cafeId;
-    const { status, search, date } = req.query;
+    const { status, search, date, startDate, endDate, range } = req.query;
 
     const whereClause: any = { cafeId };
 
@@ -437,6 +437,32 @@ export const getAdminOrders = async (req: Request, res: Response, next: NextFunc
       whereClause.createdAt = {
         gte: startOfDay,
         lte: endOfDay,
+      };
+    } else if (startDate || endDate) {
+      whereClause.createdAt = {};
+      if (startDate) {
+        const start = new Date(String(startDate));
+        start.setHours(0, 0, 0, 0);
+        whereClause.createdAt.gte = start;
+      }
+      if (endDate) {
+        const end = new Date(String(endDate));
+        end.setHours(23, 59, 59, 999);
+        whereClause.createdAt.lte = end;
+      }
+    } else if (range === '30days' || range === '1month') {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      thirtyDaysAgo.setHours(0, 0, 0, 0);
+      whereClause.createdAt = {
+        gte: thirtyDaysAgo,
+      };
+    } else if (range === '7days') {
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      sevenDaysAgo.setHours(0, 0, 0, 0);
+      whereClause.createdAt = {
+        gte: sevenDaysAgo,
       };
     }
 
@@ -496,11 +522,16 @@ export const updateOrderStatus = async (req: Request, res: Response, next: NextF
     const { id } = req.params;
     const validated = updateOrderStatusSchema.parse(req.body);
 
-    const existing = await prisma.order.findFirst({ where: { id, cafeId } });
+    const existing = await prisma.order.findFirst({
+      where: {
+        cafeId,
+        OR: [{ id }, { orderToken: id }],
+      },
+    });
     if (!existing) return res.status(404).json({ error: 'Order not found.' });
 
     const updated = await prisma.order.update({
-      where: { id },
+      where: { id: existing.id },
       data: {
         orderStatus: validated.orderStatus,
         ...(validated.paymentStatus && { paymentStatus: validated.paymentStatus }),

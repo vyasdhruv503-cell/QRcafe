@@ -22,36 +22,38 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onAdv
 
   return (
     <div
-      className={`bg-white rounded-2xl p-4 border shadow-sm flex flex-col justify-between transition-all ${
-        isUrgent ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-stone-200'
+      className={`bg-white rounded-3xl p-4 border shadow-sm flex flex-col justify-between transition-all ${
+        isUrgent ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-[#E2DCD5]'
       }`}
     >
       <div>
         {/* Card Header: Order Number & Table Badge */}
-        <div className="flex items-center justify-between border-b border-stone-100 pb-3 mb-3">
+        <div className="flex items-center justify-between border-b border-[#E2DCD5] pb-3 mb-3">
           <div>
-            <span className="text-xs font-bold text-stone-400">Order #{order.orderNumber}</span>
-            <h3 className="text-lg font-black text-stone-900 leading-tight">{order.tableNumber}</h3>
+            <span className="text-[11px] font-bold text-stone-500">Order #{order.orderNumber}</span>
+            <h3 className="text-lg font-black text-[#10B981] leading-tight">{order.tableNumber}</h3>
           </div>
 
           <div
-            className={`px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1 ${
-              isUrgent ? 'bg-rose-100 text-rose-700 animate-pulse' : 'bg-stone-100 text-stone-600'
+            className={`px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1 border ${
+              isUrgent
+                ? 'bg-rose-100 text-rose-800 border-rose-300 animate-pulse'
+                : 'bg-[#FAF7F2] text-stone-700 border-[#E2DCD5]'
             }`}
           >
-            <Clock className="w-3.5 h-3.5" />
+            <Clock className="w-3.5 h-3.5 text-[#10B981]" />
             {order.elapsedMinutes || 0}m ago
           </div>
         </div>
 
         {/* Customer Info / Notes */}
         {order.customerName && order.customerName !== 'Guest Customer' && (
-          <p className="text-xs font-semibold text-stone-700 mb-2">Guest: {order.customerName}</p>
+          <p className="text-xs font-bold text-stone-800 mb-2">Guest: {order.customerName}</p>
         )}
 
         {order.notes && (
-          <div className="mb-3 p-2 bg-amber-50 border border-amber-200/60 rounded-xl text-xs text-amber-900 font-medium">
-            <strong>Note:</strong> {order.notes}
+          <div className="mb-3 p-2.5 bg-emerald-50 border border-emerald-200/80 rounded-2xl text-xs text-emerald-900 font-medium">
+            <strong className="text-emerald-800">Note:</strong> {order.notes}
           </div>
         )}
 
@@ -60,13 +62,13 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onAdv
           {order.items.map((item) => (
             <div key={item.id} className="flex items-start justify-between text-xs">
               <div className="flex items-start gap-2">
-                <span className="w-5 h-5 rounded-md bg-stone-900 text-white font-extrabold flex items-center justify-center text-[10px] shrink-0">
+                <span className="w-5 h-5 rounded-md bg-emerald-50 border border-emerald-200 text-[#10B981] font-black flex items-center justify-center text-[10px] shrink-0">
                   {item.quantity}x
                 </span>
                 <div>
-                  <span className="font-bold text-stone-800">{item.productName}</span>
+                  <span className="font-extrabold text-stone-900">{item.productName}</span>
                   {item.specialNote && (
-                    <p className="text-[11px] text-amber-700 font-medium">↳ {item.specialNote}</p>
+                    <p className="text-[11px] text-emerald-800 font-semibold">↳ {item.specialNote}</p>
                   )}
                 </div>
               </div>
@@ -77,11 +79,11 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onAdv
 
       {/* Footer Status Transition Button */}
       {config && (
-        <div className="pt-3 border-t border-stone-100">
+        <div className="pt-3 border-t border-[#E2DCD5]">
           <Button
             variant={config.variant}
             size="sm"
-            className="w-full py-2 text-xs flex items-center justify-center gap-1.5"
+            className="w-full py-2.5 text-xs flex items-center justify-center gap-1.5 font-bold"
             onClick={() => onAdvanceStatus(order.id, config.next)}
           >
             <config.icon className="w-4 h-4" />

@@ -49,23 +49,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const sidebarContent = (
-    <aside className="w-64 bg-stone-900 text-stone-300 flex flex-col h-full border-r border-stone-800">
+    <aside className="w-64 bg-[#2C1E18] text-stone-300 flex flex-col h-full border-r border-[#3D2C24]">
       {/* Brand Header */}
-      <div className="p-6 border-b border-stone-800 flex items-center justify-between gap-3">
+      <div className="p-6 border-b border-[#3D2C24] flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-600 flex items-center justify-center text-white font-extrabold shadow-md shrink-0">
-            <QrCode className="w-6 h-6" />
+          <div className="h-10 px-2 bg-[#1F1411] border border-[#4D362C] rounded-2xl flex items-center justify-center shrink-0 shadow-md">
+            <img src="/logo.png" alt="TeaWala Logo" className="h-7 w-auto object-contain" />
           </div>
           <div>
-            <h1 className="text-base font-extrabold text-white tracking-wide">CafeQR</h1>
-            <p className="text-[11px] text-amber-500 font-medium">Smart Digital Menu</p>
+            <h1 className="text-base font-black text-white tracking-wide">TeaWala</h1>
+            <p className="text-[10px] text-[#76BC21] font-extrabold uppercase tracking-wider">EXOTIC. TRADITIONAL.</p>
           </div>
         </div>
         {/* Close button for mobile */}
         {onClose && (
           <button
             onClick={onClose}
-            className="lg:hidden p-1.5 text-stone-400 hover:text-white hover:bg-stone-800 rounded-lg transition-colors"
+            className="lg:hidden p-1.5 text-stone-400 hover:text-white hover:bg-[#3D2C24] rounded-xl transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -73,7 +73,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {/* Navigation Menu */}
-      <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = currentTab === item.id;
@@ -81,13 +81,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <button
               key={item.id}
               onClick={() => handleSelect(item.id)}
-              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-semibold transition-all ${
+              className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-bold transition-all ${
                 isActive
-                  ? 'bg-amber-600 text-white shadow-sm font-bold'
-                  : 'text-stone-400 hover:bg-stone-800 hover:text-stone-200'
+                  ? 'bg-[#3D2C24] text-[#00F5D4] border border-[#00F5D4]/30 box-glow-green font-black shadow-sm'
+                  : 'text-stone-400 hover:bg-[#3D2C24]/60 hover:text-stone-200'
               }`}
             >
-              <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-stone-400'}`} />
+              <Icon className={`w-4 h-4 ${isActive ? 'text-[#00F5D4]' : 'text-stone-400'}`} />
               {item.label}
             </button>
           );
@@ -95,16 +95,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       {/* User Info & Logout Footer */}
-      <div className="p-4 border-t border-stone-800 bg-stone-950/40">
+      <div className="p-4 border-t border-[#3D2C24] bg-[#221611]">
         <div className="flex items-center justify-between">
           <div className="min-w-0 pr-2">
-            <p className="text-xs font-bold text-white truncate">{user?.name || 'Staff User'}</p>
-            <p className="text-[10px] text-amber-400 font-semibold uppercase">{user?.role || 'ADMIN'}</p>
+            <p className="text-xs font-black text-white truncate">{user?.name || 'Staff User'}</p>
+            <p className="text-[10px] text-[#00F5D4] font-bold uppercase tracking-wider">{user?.role || 'ADMIN'}</p>
           </div>
           <button
             onClick={onLogout}
             title="Logout"
-            className="p-2 text-stone-400 hover:text-rose-400 hover:bg-stone-800 rounded-lg transition-colors"
+            className="p-2 text-stone-400 hover:text-rose-400 hover:bg-[#3D2C24] rounded-xl transition-colors"
           >
             <LogOut className="w-4 h-4" />
           </button>

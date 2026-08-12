@@ -24,9 +24,25 @@ app.use(
 );
 app.use(express.json());
 
-// Healthcheck Route
+// Healthcheck & Root API Directory Routes
+app.get(['/', '/api'], (req, res) => {
+  res.json({
+    status: 'ok',
+    system: 'TeaWala Backend REST API',
+    message: 'Welcome to TeaWala API Server 🚀',
+    endpoints: {
+      health: '/api/health',
+      publicMenu: '/api/public/menu/:tableToken',
+      auth: '/api/auth/login',
+      admin: '/api/admin/dashboard',
+      kitchen: '/api/kitchen/orders',
+    },
+    timestamp: new Date().toISOString(),
+  });
+});
+
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', system: 'CafeQR Backend API', timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', system: 'TeaWala Backend API', timestamp: new Date().toISOString() });
 });
 
 // API Routes

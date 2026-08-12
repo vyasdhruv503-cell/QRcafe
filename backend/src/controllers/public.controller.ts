@@ -169,48 +169,54 @@ export const createOrder = async (req: Request, res: Response, next: NextFunctio
     const orderToken = `ord_${crypto.randomBytes(12).toString('hex')}`;
 
     // Create Order with nested items inside a database transaction
-    const newOrder = await prisma.$transaction(async (tx) => {
-      const lastOrder = await tx.order.findFirst({ orderBy: { orderNumber: 'desc' } });
-      const nextOrderNumber = (lastOrder?.orderNumber || 100) + 1;
+    const newOrder = await prisma.$transaction(
+      async (tx) => {
+        const lastOrder = await tx.order.findFirst({
+          where: { cafeId: table.cafeId },
+          orderBy: { orderNumber: 'desc' },
+        });
+        const nextOrderNumber = (lastOrder?.orderNumber || 100) + 1;
 
-      const createdOrder = await tx.order.create({
-        data: {
-          orderNumber: nextOrderNumber,
-          orderToken,
-          cafeId: table.cafeId,
-          tableId: table.id,
-          customerName: validatedData.customerName || 'Guest Customer',
-          customerPhone: validatedData.customerPhone || null,
-          subtotal: calculatedSubtotal,
-          tax: calculatedTax,
-          discount,
-          total: grandTotal,
-          paymentStatus: 'PENDING',
-          paymentMethod: validatedData.paymentMethod || 'PAY_AT_COUNTER',
-          orderStatus: 'PENDING',
-          notes: validatedData.notes || null,
-          orderItems: {
-            create: orderItemsToCreate,
+        const createdOrder = await tx.order.create({
+          data: {
+            orderNumber: nextOrderNumber,
+            orderToken,
+            cafeId: table.cafeId,
+            tableId: table.id,
+            customerName: validatedData.customerName || 'Guest Customer',
+            customerPhone: validatedData.customerPhone || null,
+            subtotal: calculatedSubtotal,
+            tax: calculatedTax,
+            discount,
+            total: grandTotal,
+            paymentStatus: 'PENDING',
+            paymentMethod: validatedData.paymentMethod || 'PAY_AT_COUNTER',
+            orderStatus: 'PENDING',
+            notes: validatedData.notes || null,
+            orderItems: {
+              create: orderItemsToCreate,
+            },
           },
-        },
-        include: {
-          table: true,
-          orderItems: true,
-        },
-      });
+          include: {
+            table: true,
+            orderItems: true,
+          },
+        });
 
-      // Optionally create initial payment record
-      await tx.payment.create({
-        data: {
-          orderId: createdOrder.id,
-          amount: grandTotal,
-          paymentMethod: validatedData.paymentMethod || 'PAY_AT_COUNTER',
-          status: 'PENDING',
-        },
-      });
+        // Optionally create initial payment record
+        await tx.payment.create({
+          data: {
+            orderId: createdOrder.id,
+            amount: grandTotal,
+            paymentMethod: validatedData.paymentMethod || 'PAY_AT_COUNTER',
+            status: 'PENDING',
+          },
+        });
 
-      return createdOrder;
-    });
+        return createdOrder;
+      },
+      { timeout: 15000 }
+    );
 
     res.status(201).json({
       message: 'Order placed successfully!',

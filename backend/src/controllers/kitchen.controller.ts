@@ -55,11 +55,16 @@ export const advanceKitchenOrderStatus = async (req: Request, res: Response, nex
       return res.status(400).json({ error: 'Invalid kitchen target order status.' });
     }
 
-    const existing = await prisma.order.findFirst({ where: { id, cafeId } });
+    const existing = await prisma.order.findFirst({
+      where: {
+        cafeId,
+        OR: [{ id }, { orderToken: id }],
+      },
+    });
     if (!existing) return res.status(404).json({ error: 'Order not found.' });
 
     const updated = await prisma.order.update({
-      where: { id },
+      where: { id: existing.id },
       data: { orderStatus: nextStatus as any },
       include: { table: true, orderItems: true },
     });

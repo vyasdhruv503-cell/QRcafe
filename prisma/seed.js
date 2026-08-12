@@ -20,7 +20,7 @@ async function main() {
   // 2. Create Default Cafe
   const cafe = await prisma.cafe.create({
     data: {
-      name: 'My Cafe',
+      name: 'TeaWala',
       logo: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500&auto=format&fit=crop&q=80',
       address: '123 Gourmet Street, Culinary Quarter',
       phone: '+1 (555) 234-5678',

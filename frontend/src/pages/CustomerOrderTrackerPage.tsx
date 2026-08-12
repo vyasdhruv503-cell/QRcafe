@@ -92,14 +92,15 @@ export const CustomerOrderTrackerPage: React.FC<CustomerOrderTrackerPageProps> =
       <div className="bg-[#1F1512] rounded-3xl p-6 border border-[#38241D] shadow-2xl space-y-6">
         {/* Header info */}
         <div className="text-center pb-4 border-b border-[#33221B]">
-          <div className="w-14 h-14 bg-[#281A15] border border-[#483027] text-[#00F5D4] rounded-2xl flex items-center justify-center mx-auto mb-3 box-glow-green">
-            <Utensils className="w-7 h-7 text-[#00F5D4]" />
+          <div className="h-16 px-4 bg-[#281A15] border border-[#483027] rounded-2xl flex items-center justify-center mx-auto mb-3 box-glow-green inline-block">
+            <img src="/logo.png" alt="TeaWala Logo" className="h-12 w-auto object-contain mx-auto" />
           </div>
-          <div className="flex items-center justify-center gap-1 mb-1">
-            <span className="text-glow-green font-black text-lg">tea</span>
-            <span className="text-glow-white font-black text-lg">wala</span>
+          <div className="flex items-center justify-center gap-1.5 mb-1">
+            <span className="text-glow-green font-black text-xl">tea</span>
+            <span className="text-glow-white font-black text-xl">wala</span>
           </div>
-          <h1 className="text-2xl font-black text-white mt-0.5">Order #{order.orderNumber}</h1>
+          <p className="text-[10px] text-[#76BC21] font-black tracking-widest uppercase">EXOTIC. TRADITIONAL.</p>
+          <h1 className="text-2xl font-black text-white mt-2">Order #{order.orderNumber}</h1>
           <p className="text-xs text-[#00F5D4] font-semibold mt-1">{order.tableNumber}</p>
         </div>
 

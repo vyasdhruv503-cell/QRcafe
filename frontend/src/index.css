@@ -88,6 +88,34 @@ body {
   animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* Rising Steam Animation for Teacup QR Standee */
+@keyframes steamRise {
+  0% {
+    transform: translateY(0) scaleX(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(-8px) scaleX(1.25);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-18px) scaleX(1.5);
+    opacity: 0;
+  }
+}
+
+.animate-steam-1 {
+  animation: steamRise 2.4s ease-in-out infinite;
+}
+
+.animate-steam-2 {
+  animation: steamRise 2.4s ease-in-out infinite 0.8s;
+}
+
+.animate-steam-3 {
+  animation: steamRise 2.4s ease-in-out infinite 1.6s;
+}
+
 /* Print styling for QR templates */
 @media print {
   body * {
