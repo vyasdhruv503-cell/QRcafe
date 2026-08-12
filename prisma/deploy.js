@@ -1,14 +1,14 @@
 const { execSync } = require('child_process');
 
-const SUPABASE_DB_URL = "postgresql://postgres.snurrwdzxifjjtpzqvin:QRcafe123dv@aws-0-ap-south-1.pooler.supabase.com:5432/postgres";
-
 let dbUrl = process.env.DATABASE_URL;
 if (!dbUrl || (!dbUrl.startsWith('postgresql://') && !dbUrl.startsWith('postgres://'))) {
-  dbUrl = SUPABASE_DB_URL;
+  console.error('❌ Error: DATABASE_URL environment variable is missing or invalid.');
+  console.error('   Please ensure DATABASE_URL is properly configured in your environment or Render dashboard.');
+  process.exit(1);
 }
 
 console.log('🚀 Prisma Deploy Script starting...');
-console.log('📡 Using PostgreSQL Database host:', dbUrl.split('@')[1] || 'Supabase');
+console.log('📡 Using PostgreSQL Database host:', dbUrl.split('@')[1] || 'PostgreSQL Host');
 
 const envVars = { ...process.env, DATABASE_URL: dbUrl };
 
