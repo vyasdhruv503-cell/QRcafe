@@ -20,17 +20,15 @@ console.log('📡 Using PostgreSQL Database host:', dbUrl.split('@')[1] || 'Aive
 const envVars = { ...process.env, DATABASE_URL: dbUrl };
 
 try {
+  // Remove any stale backend/node_modules/@prisma/client directory if present
+  const backendClientDir = path.join(__dirname, '../backend/node_modules/@prisma/client');
+  if (fs.existsSync(backendClientDir)) {
+    console.log('🧹 Removing stale backend/node_modules/@prisma/client...');
+    fs.rmSync(backendClientDir, { recursive: true, force: true });
+  }
+
   console.log('1️⃣ Generating Prisma Client...');
   execSync('npx prisma generate --schema=./prisma/schema.prisma', { stdio: 'inherit', env: envVars });
-
-  // Explicitly copy generated Prisma Client to backend/node_modules/@prisma/client if present
-  const rootClient = path.join(__dirname, '../node_modules/@prisma/client');
-  const backendClient = path.join(__dirname, '../backend/node_modules/@prisma/client');
-
-  if (fs.existsSync(backendClient) && fs.existsSync(rootClient)) {
-    console.log('📋 Copying generated PostgreSQL Prisma Client to backend/node_modules/@prisma/client...');
-    fs.cpSync(rootClient, backendClient, { recursive: true, force: true });
-  }
 
   console.log('2️⃣ Pushing schema to PostgreSQL (migrate)...');
   execSync('npx prisma db push --schema=./prisma/schema.prisma --accept-data-loss', { stdio: 'inherit', env: envVars });
