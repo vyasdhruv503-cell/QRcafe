@@ -179,7 +179,6 @@ export const QRPreviewModal: React.FC<QRPreviewModalProps> = ({
 
             <div style="margin-top:12px; margin-bottom:12px;">
               <div style="font-size:22px; font-weight:900; color:#00F5D4;">tea<span style="color:#ffffff;">wala</span></div>
-              <div style="font-size:9px; font-weight:900; color:#76BC21; letter-spacing:2px;">EXOTIC. TRADITIONAL.</div>
             </div>
 
             <div class="qr-box">
@@ -261,9 +260,6 @@ export const QRPreviewModal: React.FC<QRPreviewModalProps> = ({
                   <span className="text-glow-white font-black text-lg tracking-tight">wala</span>
                 </div>
               </div>
-              <p className="text-[9px] text-[#76BC21] font-black uppercase tracking-widest">
-                EXOTIC. TRADITIONAL.
-              </p>
             </div>
 
             {/* QR Code Container inside Teacup Body */}

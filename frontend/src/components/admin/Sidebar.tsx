@@ -58,7 +58,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
           <div>
             <h1 className="text-base font-black text-white tracking-wide">TeaWala</h1>
-            <p className="text-[10px] text-[#76BC21] font-extrabold uppercase tracking-wider">EXOTIC. TRADITIONAL.</p>
           </div>
         </div>
         {/* Close button for mobile */}

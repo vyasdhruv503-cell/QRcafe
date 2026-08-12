@@ -30,9 +30,6 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="text-glow-green font-black text-xl tracking-tight">tea</span>
               <span className="text-glow-white font-black text-xl tracking-tight">wala</span>
               <span className="w-1 h-5 bg-gradient-to-b from-amber-400 to-amber-600 rounded-full box-glow-amber mx-1 inline-block shrink-0" />
-              <span className="text-glow-amber text-[10px] font-black tracking-widest uppercase shrink-0 inline-block">
-                EXOTIC. TRADITIONAL.
-              </span>
             </div>
 
             <div className="flex items-center gap-2 mt-0.5">

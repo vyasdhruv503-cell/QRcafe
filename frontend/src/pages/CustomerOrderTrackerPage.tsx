@@ -99,7 +99,6 @@ export const CustomerOrderTrackerPage: React.FC<CustomerOrderTrackerPageProps> =
             <span className="text-glow-green font-black text-xl">tea</span>
             <span className="text-glow-white font-black text-xl">wala</span>
           </div>
-          <p className="text-[10px] text-[#76BC21] font-black tracking-widest uppercase">EXOTIC. TRADITIONAL.</p>
           <h1 className="text-2xl font-black text-white mt-2">Order #{order.orderNumber}</h1>
           <p className="text-xs text-[#00F5D4] font-semibold mt-1">{order.tableNumber}</p>
         </div>
