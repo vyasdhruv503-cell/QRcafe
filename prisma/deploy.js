@@ -10,7 +10,12 @@ const AIVEN_DB_URL = [
 ].join('');
 
 let dbUrl = process.env.DATABASE_URL;
-if (!dbUrl || !dbUrl.includes('aivencloud.com')) {
+
+if (dbUrl) {
+  dbUrl = dbUrl.trim().replace(/^["']|["']$/g, '');
+}
+
+if (!dbUrl || (!dbUrl.startsWith('postgresql://') && !dbUrl.startsWith('postgres://'))) {
   dbUrl = AIVEN_DB_URL;
 }
 

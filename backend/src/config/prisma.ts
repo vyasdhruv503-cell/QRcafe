@@ -9,8 +9,12 @@ const AIVEN_DB_URL = [
 
 let dbUrl = process.env.DATABASE_URL;
 
-// Guarantee fallback to Aiven PostgreSQL if env var is missing or invalid
-if (!dbUrl || !dbUrl.includes('aivencloud.com')) {
+if (dbUrl) {
+  dbUrl = dbUrl.trim().replace(/^["']|["']$/g, '');
+}
+
+// Ensure dbUrl starts with postgresql:// or postgres://, otherwise fallback to Aiven
+if (!dbUrl || (!dbUrl.startsWith('postgresql://') && !dbUrl.startsWith('postgres://'))) {
   dbUrl = AIVEN_DB_URL;
 }
 
