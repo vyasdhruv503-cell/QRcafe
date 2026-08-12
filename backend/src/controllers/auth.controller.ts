@@ -9,27 +9,20 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const validated = loginSchema.parse(req.body);
     const userInput = validated.email.trim().toLowerCase();
 
-    // Build dynamic where clause — support email, role shortcut, or name
-    let user = await prisma.user.findFirst({
-      where: { email: { equals: userInput, mode: 'insensitive' } },
+    // 1. Fetch users with cafe included
+    const allUsers = await prisma.user.findMany({
       include: { cafe: true },
     });
 
-    // Shortcut: "admin" or "kitchen" keyword login
-    if (!user && (userInput === 'admin' || userInput === 'kitchen')) {
-      user = await prisma.user.findFirst({
-        where: { role: userInput.toUpperCase() as 'ADMIN' | 'KITCHEN' },
-        include: { cafe: true },
-      });
-    }
-
-    // Fallback: match by display name
-    if (!user) {
-      user = await prisma.user.findFirst({
-        where: { name: { equals: userInput, mode: 'insensitive' } },
-        include: { cafe: true },
-      });
-    }
+    // 2. Flexible matching (email, role shortcut, name)
+    const user = allUsers.find((u) => {
+      const emailMatch = u.email.toLowerCase() === userInput;
+      const nameMatch = u.name.toLowerCase() === userInput;
+      const roleShortcut =
+        (userInput === 'admin' && u.role === 'ADMIN') ||
+        (userInput === 'kitchen' && u.role === 'KITCHEN');
+      return emailMatch || nameMatch || roleShortcut;
+    });
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid Staff ID / Email or password.' });
@@ -64,8 +57,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
         email: user.email,
         role: user.role,
         cafeId: user.cafeId,
-        cafeName: user.cafe.name,
-        currency: user.cafe.currency,
+        cafeName: user.cafe?.name || 'TeaWala',
+        currency: user.cafe?.currency || '₹',
       },
     });
   } catch (error) {
@@ -95,8 +88,8 @@ export const getMe = async (req: Request, res: Response, next: NextFunction) => 
         email: user.email,
         role: user.role,
         cafeId: user.cafeId,
-        cafeName: user.cafe.name,
-        currency: user.cafe.currency,
+        cafeName: user.cafe?.name || 'TeaWala',
+        currency: user.cafe?.currency || '₹',
       },
     });
   } catch (error) {
