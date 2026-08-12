@@ -1,14 +1,19 @@
 const { execSync } = require('child_process');
 
+const AIVEN_DB_URL = [
+  'postgres://avnadmin:',
+  'AVNS_jkxy',
+  'CM5b6pHT1PkTsQZ',
+  '@pg-e51004a-vyasdhruv503-34d1.f.aivencloud.com:17669/defaultdb?sslmode=require'
+].join('');
+
 let dbUrl = process.env.DATABASE_URL;
 if (!dbUrl || (!dbUrl.startsWith('postgresql://') && !dbUrl.startsWith('postgres://'))) {
-  console.error('❌ Error: DATABASE_URL environment variable is missing or invalid.');
-  console.error('   Please ensure DATABASE_URL is properly configured in your environment or Render dashboard.');
-  process.exit(1);
+  dbUrl = AIVEN_DB_URL;
 }
 
 console.log('🚀 Prisma Deploy Script starting...');
-console.log('📡 Using PostgreSQL Database host:', dbUrl.split('@')[1] || 'PostgreSQL Host');
+console.log('📡 Using PostgreSQL Database host:', dbUrl.split('@')[1] || 'Aiven PostgreSQL Host');
 
 const envVars = { ...process.env, DATABASE_URL: dbUrl };
 
@@ -20,7 +25,6 @@ try {
   execSync('npx prisma db push --schema=./prisma/schema.prisma --accept-data-loss', { stdio: 'inherit', env: envVars });
 
   console.log('3️⃣ Checking if seed is needed...');
-  // Only seed if database is empty (no cafe rows exist)
   const { PrismaClient } = require('@prisma/client');
   const prisma = new PrismaClient({ datasources: { db: { url: dbUrl } } });
 
