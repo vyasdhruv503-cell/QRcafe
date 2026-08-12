@@ -1,4 +1,6 @@
 const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
 const AIVEN_DB_URL = [
   'postgres://avnadmin:',
@@ -18,9 +20,17 @@ console.log('📡 Using PostgreSQL Database host:', dbUrl.split('@')[1] || 'Aive
 const envVars = { ...process.env, DATABASE_URL: dbUrl };
 
 try {
-  console.log('1️⃣ Generating Prisma Client for root & backend...');
+  console.log('1️⃣ Generating Prisma Client...');
   execSync('npx prisma generate --schema=./prisma/schema.prisma', { stdio: 'inherit', env: envVars });
-  execSync('cd backend && npx prisma generate --schema=../prisma/schema.prisma', { stdio: 'inherit', env: envVars });
+
+  // Explicitly copy generated Prisma Client to backend/node_modules/@prisma/client if present
+  const rootClient = path.join(__dirname, '../node_modules/@prisma/client');
+  const backendClient = path.join(__dirname, '../backend/node_modules/@prisma/client');
+
+  if (fs.existsSync(backendClient) && fs.existsSync(rootClient)) {
+    console.log('📋 Copying generated PostgreSQL Prisma Client to backend/node_modules/@prisma/client...');
+    fs.cpSync(rootClient, backendClient, { recursive: true, force: true });
+  }
 
   console.log('2️⃣ Pushing schema to PostgreSQL (migrate)...');
   execSync('npx prisma db push --schema=./prisma/schema.prisma --accept-data-loss', { stdio: 'inherit', env: envVars });
