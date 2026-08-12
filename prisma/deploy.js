@@ -18,8 +18,9 @@ console.log('📡 Using PostgreSQL Database host:', dbUrl.split('@')[1] || 'Aive
 const envVars = { ...process.env, DATABASE_URL: dbUrl };
 
 try {
-  console.log('1️⃣ Generating Prisma Client...');
+  console.log('1️⃣ Generating Prisma Client for root & backend...');
   execSync('npx prisma generate --schema=./prisma/schema.prisma', { stdio: 'inherit', env: envVars });
+  execSync('cd backend && npx prisma generate --schema=../prisma/schema.prisma', { stdio: 'inherit', env: envVars });
 
   console.log('2️⃣ Pushing schema to PostgreSQL (migrate)...');
   execSync('npx prisma db push --schema=./prisma/schema.prisma --accept-data-loss', { stdio: 'inherit', env: envVars });
