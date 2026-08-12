@@ -50,37 +50,48 @@ export const App: React.FC = () => {
       return;
     }
 
-    // 2. Check for active staff authentication
+    // 2. Direct path routing
+    if (path.includes('/admin/login') || path.includes('/login')) {
+      setView('login');
+    } else if (path.includes('/admin')) {
+      setView('admin');
+    } else if (path.includes('/kitchen')) {
+      setView('kitchen');
+    } else {
+      setTableToken('tok_table01_demo');
+      setView('customer_menu');
+    }
+
+    // 3. Instant local user hydration (0ms delay)
     const token = localStorage.getItem('cafeqr_token');
+    const userStr = localStorage.getItem('cafeqr_user');
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setCurrentUser(user);
+      } catch (e) {
+        console.warn('Failed to parse cached user', e);
+      }
+    }
+
+    // Unblock UI immediately — zero loading delay
+    setIsInitializing(false);
+
+    // 4. Verify token asynchronously in background
     if (token) {
       api
         .getMe()
         .then((res) => {
           setCurrentUser(res.user);
-          if (res.user.role === 'KITCHEN') {
-            setView('kitchen');
-          } else {
-            setView('admin');
-          }
         })
         .catch(() => {
+          // Fallback cleanly if token is invalid
           api.logout();
+          setCurrentUser(null);
           if (path.includes('/admin') || path.includes('/kitchen')) {
             setView('login');
-          } else {
-            setTableToken('tok_table01_demo');
-            setView('customer_menu');
           }
-        })
-        .finally(() => setIsInitializing(false));
-    } else {
-      if (path.includes('/admin') || path.includes('/kitchen') || path.includes('/login')) {
-        setView('login');
-      } else {
-        setTableToken('tok_table01_demo');
-        setView('customer_menu');
-      }
-      setIsInitializing(false);
+        });
     }
 
     // Listen for back/forward browser navigation
