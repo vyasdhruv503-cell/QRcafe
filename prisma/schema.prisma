@@ -9,6 +9,13 @@ generator client {
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
+generator backendClient {
+  provider      = "prisma-client-js"
+  engineType    = "binary"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  output        = "../backend/node_modules/@prisma/client"
+}
+
 model Cafe {
   id          String       @id @default(uuid())
   name        String
