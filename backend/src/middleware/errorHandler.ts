@@ -4,17 +4,10 @@ import { Prisma } from '@prisma/client';
 
 const MAX_MSG_LENGTH = 500;
 
-/**
- * Safe error message extractor.
- * Prevents Prisma's minified runtime bundle from being dumped into logs.
- * Prisma DLL/query-engine errors on Windows can have `.message` or `.stack`
- * that literally contains the entire minified client source.
- */
 function safeErrMessage(err: any): string {
   try {
     if (typeof err === 'string') return err.slice(0, MAX_MSG_LENGTH);
 
-    // Prefer code-based identification for Prisma errors
     if (err?.code && typeof err.code === 'string') {
       const base = `[${err.code}]`;
       const detail = typeof err.message === 'string' && err.message.length < MAX_MSG_LENGTH
@@ -27,7 +20,6 @@ function safeErrMessage(err: any): string {
       return err.message;
     }
 
-    // message is enormous (Prisma bundle dump) — use name/type only
     if (err?.name) return `${err.name} (message too large to display)`;
     return 'Unknown server error';
   } catch {
@@ -61,7 +53,7 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
     if (err.code === 'P2003') {
       return res.status(400).json({ error: 'Invalid reference or missing relation.' });
     }
-    return res.status(500).json({ error: `Database error [${err.code}].` });
+    return res.status(500).json({ error: `Database error [${err.code}]: ${err.message?.slice(0, 200)}` });
   }
 
   // 3. Prisma Initialization / Connection Errors
@@ -69,8 +61,8 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
     err instanceof Prisma.PrismaClientInitializationError ||
     err instanceof Prisma.PrismaClientRustPanicError
   ) {
-    console.error('🔴 Prisma engine failed to initialize. Check DATABASE_URL and query engine.');
-    return res.status(503).json({ error: 'Database service unavailable. Please try again later.' });
+    console.error('🔴 Prisma engine failed to initialize:', err.message?.slice(0, 300));
+    return res.status(503).json({ error: `Database Init Error: ${err.message?.slice(0, 300)}` });
   }
 
   // 4. General HTTP Errors
