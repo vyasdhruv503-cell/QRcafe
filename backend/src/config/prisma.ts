@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 
 const AIVEN_DB_URL = [
-  'postgres://avnadmin:',
+  'postgresql://avnadmin:',
   'AVNS_jkxy',
   'CM5b6pHT1PkTsQZ',
   '@pg-e51004a-vyasdhruv503-34d1.f.aivencloud.com:17669/defaultdb?sslmode=require'
