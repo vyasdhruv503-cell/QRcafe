@@ -7,31 +7,35 @@ import { loginSchema } from '../validators/auth.validator';
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const validated = loginSchema.parse(req.body);
+    const userInput = validated.email.trim().toLowerCase();
 
-    const userInput = validated.email.trim();
-
-    const users = await prisma.user.findMany({
+    // Build dynamic where clause — support email, role shortcut, or name
+    let user = await prisma.user.findFirst({
+      where: { email: { equals: userInput, mode: 'insensitive' } },
       include: { cafe: true },
     });
 
-    const user = users.find((u, index) => {
-      const staffId = `STF-${(101 + index).toString().padStart(3, '0')}`;
-      return (
-        u.email.toLowerCase() === userInput.toLowerCase() ||
-        u.id === userInput ||
-        staffId.toLowerCase() === userInput.toLowerCase() ||
-        u.name.toLowerCase() === userInput.toLowerCase() ||
-        (userInput.toLowerCase() === 'admin' && u.role === 'ADMIN') ||
-        (userInput.toLowerCase() === 'kitchen' && u.role === 'KITCHEN')
-      );
-    });
+    // Shortcut: "admin" or "kitchen" keyword login
+    if (!user && (userInput === 'admin' || userInput === 'kitchen')) {
+      user = await prisma.user.findFirst({
+        where: { role: userInput.toUpperCase() as 'ADMIN' | 'KITCHEN' },
+        include: { cafe: true },
+      });
+    }
+
+    // Fallback: match by display name
+    if (!user) {
+      user = await prisma.user.findFirst({
+        where: { name: { equals: userInput, mode: 'insensitive' } },
+        include: { cafe: true },
+      });
+    }
 
     if (!user) {
       return res.status(401).json({ error: 'Invalid Staff ID / Email or password.' });
     }
 
     const isValidPassword = await bcrypt.compare(validated.password, user.password);
-
     if (!isValidPassword) {
       return res.status(401).json({ error: 'Invalid Staff ID / Email or password.' });
     }
@@ -39,15 +43,17 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
     const jwtSecret = process.env.JWT_SECRET || 'super-secret-jwt-key-change-in-production-cafeqr-2026';
     const jwtExpiresIn = process.env.JWT_EXPIRES_IN || '7d';
 
-    const tokenPayload = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      cafeId: user.cafeId,
-    };
-
-    const token = jwt.sign(tokenPayload, jwtSecret, { expiresIn: jwtExpiresIn as any });
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        cafeId: user.cafeId,
+      },
+      jwtSecret,
+      { expiresIn: jwtExpiresIn as any }
+    );
 
     res.json({
       message: 'Login successful',
