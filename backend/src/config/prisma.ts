@@ -4,13 +4,13 @@ const AIVEN_DB_URL = [
   'postgresql://avnadmin:',
   'AVNS_jkxy',
   'CM5b6pHT1PkTsQZ',
-  '@pg-e51004a-vyasdhruv503-34d1.f.aivencloud.com:17669/defaultdb?sslmode=no-verify'
+  '@pg-e51004a-vyasdhruv503-34d1.f.aivencloud.com:17669/defaultdb?sslmode=require'
 ].join('');
 
-let dbUrl = process.env.DATABASE_URL || AIVEN_DB_URL;
+let dbUrl = process.env.DATABASE_URL;
 
-// Ensure any stale Supabase URL in Render environment is automatically overridden by Aiven
-if (!dbUrl || dbUrl.includes('supabase')) {
+// Guarantee fallback to Aiven PostgreSQL if env var is missing or invalid
+if (!dbUrl || !dbUrl.includes('aivencloud.com')) {
   dbUrl = AIVEN_DB_URL;
 }
 
