@@ -3,8 +3,30 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load environment variables
+// Load environment variables FIRST
 dotenv.config({ path: path.join(__dirname, '../../.env') });
+
+// ─── Global process-level error guards ───────────────────────────────────────
+// These catch errors that bypass Express middleware (e.g. Prisma DLL init on Windows)
+// and prevent Node from dumping the entire Prisma minified bundle to stderr.
+process.on('unhandledRejection', (reason: any) => {
+  const msg =
+    typeof reason === 'string'
+      ? reason.slice(0, 400)
+      : reason?.message
+      ? String(reason.message).slice(0, 400)
+      : reason?.code
+      ? `[${reason.code}] Unhandled DB/Prisma rejection`
+      : 'Unhandled promise rejection (no message)';
+  console.error('⚠️  [UnhandledRejection]:', msg);
+});
+
+process.on('uncaughtException', (err: any) => {
+  const msg = err?.message ? String(err.message).slice(0, 400) : String(err?.name || 'UncaughtException');
+  console.error('💥 [UncaughtException]:', msg);
+  // Do NOT exit — let ts-node-dev respawn
+});
+// ─────────────────────────────────────────────────────────────────────────────
 
 import publicRoutes from './routes/public.routes';
 import authRoutes from './routes/auth.routes';
