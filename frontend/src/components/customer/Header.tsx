@@ -16,8 +16,8 @@ export const Header: React.FC<HeaderProps> = ({
   orderHistoryCount = 0,
 }) => {
   return (
-    <header className="bg-[#170E0B]/95 text-white backdrop-blur-md border-b border-[#38241D] sticky top-0 z-30 shadow-xl">
-      <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+    <header className="bg-[#170E0B]/95 text-white backdrop-blur-md border-b border-[#38241D] sticky top-0 z-30 shadow-xl h-16">
+      <div className="max-w-3xl mx-auto px-4 h-full flex items-center justify-between">
         {/* Teawala Dark Brown Signboard Brand Header */}
         <div className="flex items-center gap-3">
           <div className="h-10 px-2.5 rounded-2xl bg-[#251713] border border-[#4A3228] flex items-center justify-center shrink-0 shadow-md">
