@@ -115,7 +115,11 @@ export const getProducts = async (req: Request, res: Response, next: NextFunctio
     const products = await prisma.product.findMany({
       where: { cafeId },
       include: { category: true },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [
+        { category: { sortOrder: 'asc' } },
+        { price: 'asc' },
+        { name: 'asc' },
+      ],
     });
 
     res.json(

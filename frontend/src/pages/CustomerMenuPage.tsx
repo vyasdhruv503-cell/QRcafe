@@ -15,10 +15,10 @@ interface CustomerMenuPageProps {
   onOrderPlaced: (orderToken: string) => void;
 }
 
-// Seamless Fallback Menu Dataset (Guarantees UI renders instantly even before DB seed)
+// Seamless Fallback Menu Dataset (TeaWala Authentic Digital Menu)
 const FALLBACK_CAFE: CafeInfo = {
   id: 'cafe_1',
-  name: 'My Cafe',
+  name: 'TeaWala',
   logo: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500&auto=format&fit=crop&q=80',
   address: '123 Gourmet Street, Culinary Quarter',
   phone: '+1 (555) 234-5678',
@@ -35,88 +35,62 @@ const FALLBACK_TABLE: TableInfo = {
 };
 
 const FALLBACK_CATEGORIES: Category[] = [
-  { id: 'cat_1', name: 'Pizza', sortOrder: 1 },
-  { id: 'cat_2', name: 'Burger', sortOrder: 2 },
-  { id: 'cat_3', name: 'Sandwich', sortOrder: 3 },
-  { id: 'cat_4', name: 'Starters', sortOrder: 4 },
-  { id: 'cat_5', name: 'Main Course', sortOrder: 5 },
-  { id: 'cat_6', name: 'Drinks', sortOrder: 6 },
-  { id: 'cat_7', name: 'Desserts', sortOrder: 7 },
+  { id: 'cat_1', name: 'Milk Tea', description: 'Traditional spiced milk teas & aromatic herbal tea blends', sortOrder: 1 },
+  { id: 'cat_2', name: 'No Milk Tea', description: 'Refreshing black teas, green teas & herbal kahwa infusions', sortOrder: 2 },
+  { id: 'cat_3', name: 'Café Addiction', description: 'Signature hot & chilled coffees, flavored coffees & hot chocolate', sortOrder: 3 },
+  { id: 'cat_4', name: 'Sandwiches', description: 'Freshly grilled paninis, cheese chutney & layered club sandwiches', sortOrder: 4 },
+  { id: 'cat_5', name: 'Frankies & Burger', description: 'Crispy veg & paneer rolls, Schezwan rolls & loaded gourmet burgers', sortOrder: 5 },
+  { id: 'cat_6', name: 'Maggi', description: 'Hot, cheesy, buttery & spiced instant Maggi noodles bowls', sortOrder: 6 },
+  { id: 'cat_7', name: 'Healthy Snack', description: 'Fresh Gujarati methi thepla, hot rava upma & masala oats', sortOrder: 7 },
 ];
 
 const FALLBACK_PRODUCTS: Product[] = [
   {
     id: 'prod_1',
     categoryId: 'cat_1',
-    categoryName: 'Pizza',
-    name: 'Margherita Supreme',
-    description: 'San Marzano tomato sauce, fresh buffalo mozzarella, olive oil & torn basil.',
-    price: 349.0,
-    image: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=500&auto=format&fit=crop&q=80',
+    categoryName: 'Milk Tea',
+    name: 'Traditional Tea (Half)',
+    description: 'Classic cutting chai brewed with milk, cardamom & tea leaves (Half cup)',
+    price: 12.0,
+    image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&auto=format&fit=crop&q=80',
     isVeg: true,
     isFeatured: true,
     isAvailable: true,
-    preparationTime: 18,
+    preparationTime: 5,
   },
   {
     id: 'prod_2',
     categoryId: 'cat_1',
-    categoryName: 'Pizza',
-    name: 'Pepperoni Feast',
-    description: 'Loaded with double crispy pepperoni slices, spicy marinara & provolone.',
-    price: 429.0,
-    image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=500&auto=format&fit=crop&q=80',
-    isVeg: false,
+    categoryName: 'Milk Tea',
+    name: 'Traditional Tea (Full)',
+    description: 'Classic rich milk tea brewed with cardamom & tea leaves (Full cup)',
+    price: 20.0,
+    image: 'https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=500&auto=format&fit=crop&q=80',
+    isVeg: true,
     isFeatured: true,
     isAvailable: true,
-    preparationTime: 20,
+    preparationTime: 5,
   },
   {
     id: 'prod_3',
-    categoryId: 'cat_2',
-    categoryName: 'Burger',
-    name: 'Classic Smash Cheeseburger',
-    description: 'Double Angus beef patties, melted American cheese, house sauce & pickles.',
-    price: 289.0,
-    image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop&q=80',
-    isVeg: false,
-    isFeatured: true,
-    isAvailable: true,
-    preparationTime: 15,
-  },
-  {
-    id: 'prod_4',
-    categoryId: 'cat_2',
-    categoryName: 'Burger',
-    name: 'Crispy Avocado Veggie Burger',
-    description: 'Quinoa & chickpea patty, fresh avocado, chipotle aioli & butter lettuce.',
-    price: 249.0,
-    image: 'https://images.unsplash.com/photo-1520072959219-c595dc870360?w=500&auto=format&fit=crop&q=80',
+    categoryId: 'cat_1',
+    categoryName: 'Milk Tea',
+    name: 'Ginger Tea',
+    description: 'Steaming hot milk tea infused with freshly crushed ginger',
+    price: 35.0,
+    image: 'https://images.unsplash.com/photo-1561336313-0bd5e0b27ec8?w=500&auto=format&fit=crop&q=80',
     isVeg: true,
     isFeatured: false,
     isAvailable: true,
-    preparationTime: 15,
+    preparationTime: 5,
   },
   {
-    id: 'prod_5',
-    categoryId: 'cat_4',
-    categoryName: 'Starters',
-    name: 'Truffle Parmesan Loaded Fries',
-    description: 'Hand-cut fries tossed in white truffle oil, Parmigiano-Reggiano & parsley.',
-    price: 189.0,
-    image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=500&auto=format&fit=crop&q=80',
-    isVeg: true,
-    isFeatured: true,
-    isAvailable: true,
-    preparationTime: 10,
-  },
-  {
-    id: 'prod_6',
-    categoryId: 'cat_6',
-    categoryName: 'Drinks',
-    name: 'Iced Vanilla Bean Latte',
-    description: 'Double espresso shot poured over chilled oat milk and natural vanilla syrup.',
-    price: 149.0,
+    id: 'prod_4',
+    categoryId: 'cat_3',
+    categoryName: 'Café Addiction',
+    name: 'Hot Coffee',
+    description: 'Freshly brewed aromatic hot milk coffee',
+    price: 35.0,
     image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&auto=format&fit=crop&q=80',
     isVeg: true,
     isFeatured: true,
@@ -124,19 +98,47 @@ const FALLBACK_PRODUCTS: Product[] = [
     preparationTime: 5,
   },
   {
-    id: 'prod_7',
-    categoryId: 'cat_7',
-    categoryName: 'Desserts',
-    name: 'Molten Belgian Lava Cake',
-    description: 'Warm chocolate cake with a gooey oozing center, served with vanilla ice cream.',
-    price: 219.0,
-    image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=500&auto=format&fit=crop&q=80',
+    id: 'prod_5',
+    categoryId: 'cat_3',
+    categoryName: 'Café Addiction',
+    name: 'Cold Coffee',
+    description: 'Thick, creamy chilled espresso blended with milk and vanilla ice cream',
+    price: 60.0,
+    image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&auto=format&fit=crop&q=80',
     isVeg: true,
     isFeatured: true,
     isAvailable: true,
-    preparationTime: 12,
+    preparationTime: 7,
+  },
+  {
+    id: 'prod_6',
+    categoryId: 'cat_4',
+    categoryName: 'Sandwiches',
+    name: 'Aaloo Mutter Sandwich',
+    description: 'Spiced potato & green peas masala grilled sandwich',
+    price: 60.0,
+    image: 'https://images.unsplash.com/photo-1539252554453-80ab65ce3586?w=500&auto=format&fit=crop&q=80',
+    isVeg: true,
+    isFeatured: false,
+    isAvailable: true,
+    preparationTime: 6,
+  },
+  {
+    id: 'prod_7',
+    categoryId: 'cat_4',
+    categoryName: 'Sandwiches',
+    name: 'Veg Cheese Schezwan',
+    description: 'Loaded vegetables, spicy Schezwan sauce & melted cheese grilled toast',
+    price: 100.0,
+    image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&auto=format&fit=crop&q=80',
+    isVeg: true,
+    isFeatured: true,
+    isAvailable: true,
+    preparationTime: 8,
   },
 ];
+
+type SortMode = 'price_asc' | 'price_desc' | 'featured';
 
 export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
   tableToken,
@@ -150,6 +152,7 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isVegOnly, setIsVegOnly] = useState<boolean>(false);
+  const [sortBy, setSortBy] = useState<SortMode>('price_asc');
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -258,18 +261,65 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
     onOrderPlaced(res.order.orderToken);
   };
 
-  // Filter products by category, search, and veg preference
-  const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
-      const matchesCategory = selectedCategory === 'ALL' || p.categoryId === selectedCategory;
+  // Helper to sort product list by chosen criteria (default: price ascending)
+  const sortProducts = (items: Product[]): Product[] => {
+    return [...items].sort((a, b) => {
+      if (sortBy === 'price_asc') return a.price - b.price;
+      if (sortBy === 'price_desc') return b.price - a.price;
+      if (sortBy === 'featured') {
+        if (a.isFeatured && !b.isFeatured) return -1;
+        if (!a.isFeatured && b.isFeatured) return 1;
+        return a.price - b.price;
+      }
+      return a.price - b.price;
+    });
+  };
+
+  // Planned Category-wise & Price-wise Grouping
+  const groupedMenu = useMemo(() => {
+    // 1. Filter base products by search and veg filter
+    const matchesFilter = (p: Product) => {
       const matchesSearch =
         searchQuery.trim() === '' ||
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
       const matchesVeg = !isVegOnly || p.isVeg;
-      return matchesCategory && matchesSearch && matchesVeg;
-    });
-  }, [products, selectedCategory, searchQuery, isVegOnly]);
+      return matchesSearch && matchesVeg;
+    };
+
+    if (selectedCategory === 'ALL') {
+      // Return sections for every category that has matching items
+      return categories
+        .map((cat) => {
+          const catProducts = products.filter(
+            (p) => (p.categoryId === cat.id || p.categoryName === cat.name) && matchesFilter(p)
+          );
+          return {
+            category: cat,
+            items: sortProducts(catProducts),
+          };
+        })
+        .filter((group) => group.items.length > 0);
+    } else {
+      // Return single selected category
+      const targetCat = categories.find((c) => c.id === selectedCategory);
+      const catProducts = products.filter(
+        (p) => (p.categoryId === selectedCategory || (targetCat && p.categoryName === targetCat.name)) && matchesFilter(p)
+      );
+      return targetCat
+        ? [
+            {
+              category: targetCat,
+              items: sortProducts(catProducts),
+            },
+          ]
+        : [];
+    }
+  }, [products, categories, selectedCategory, searchQuery, isVegOnly, sortBy]);
+
+  const totalVisibleCount = useMemo(() => {
+    return groupedMenu.reduce((acc, g) => acc + g.items.length, 0);
+  }, [groupedMenu]);
 
   return (
     <div className="min-h-screen pb-28 bg-[#140D0B] text-stone-100 font-sans">
@@ -294,14 +344,30 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
 
       {/* Main Container */}
       <main className="max-w-3xl mx-auto px-4 pt-4 space-y-4">
-        {/* Search & Veg Filter Bar */}
-        <div className="flex items-center gap-2">
-          <div className="flex-1">
-            <SearchBar value={searchQuery} onChange={setSearchQuery} />
-          </div>
+        {/* Search Bar */}
+        <SearchBar value={searchQuery} onChange={setSearchQuery} />
+
+        {/* Categories Horizontal Tabs */}
+        <CategoryTabs
+          categories={categories}
+          selectedCategoryId={selectedCategory}
+          onSelectCategory={(id) => {
+            setSelectedCategory(id);
+            if (id !== 'ALL') {
+              const el = document.getElementById(`cat-section-${id}`);
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }
+          }}
+        />
+
+        {/* Filter & Sorting Controls Bar */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 pb-1">
+          {/* Veg Only Toggle */}
           <button
             onClick={() => setIsVegOnly(!isVegOnly)}
-            className={`px-3.5 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center gap-1.5 shrink-0 border active:scale-95 ${
+            className={`px-3 py-1.5 rounded-2xl text-xs font-black transition-all flex items-center gap-1.5 shrink-0 border active:scale-95 ${
               isVegOnly
                 ? 'bg-gradient-to-r from-[#00F5D4] to-[#10B981] text-[#140D0B] border-[#00F5D4] box-glow-green'
                 : 'bg-[#1F1512] text-stone-300 border-[#38241D] hover:bg-[#2A1D18]'
@@ -314,50 +380,128 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
             >
               <span className={`w-1.5 h-1.5 rounded-full ${isVegOnly ? 'bg-[#140D0B]' : 'bg-[#00F5D4]'}`} />
             </span>
-            <span>Veg Only</span>
+            <span>Pure Veg</span>
           </button>
+
+          {/* Price Sorting Selector */}
+          <div className="flex items-center gap-1.5 ml-auto">
+            <span className="text-[11px] font-bold text-stone-400 uppercase tracking-wider hidden sm:inline">
+              Sort:
+            </span>
+            <div className="flex items-center bg-[#1F1512] border border-[#38241D] rounded-2xl p-1 gap-1">
+              <button
+                onClick={() => setSortBy('price_asc')}
+                className={`px-2.5 py-1 rounded-xl text-[11px] font-black transition-all ${
+                  sortBy === 'price_asc'
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 shadow-xs'
+                    : 'text-stone-400 hover:text-stone-200'
+                }`}
+                title="Sort by Price: Lowest to Highest"
+              >
+                ₹ Price: Low &rarr; High
+              </button>
+              <button
+                onClick={() => setSortBy('price_desc')}
+                className={`px-2.5 py-1 rounded-xl text-[11px] font-black transition-all ${
+                  sortBy === 'price_desc'
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 shadow-xs'
+                    : 'text-stone-400 hover:text-stone-200'
+                }`}
+                title="Sort by Price: Highest to Lowest"
+              >
+                ₹ High &rarr; Low
+              </button>
+              <button
+                onClick={() => setSortBy('featured')}
+                className={`px-2.5 py-1 rounded-xl text-[11px] font-black transition-all ${
+                  sortBy === 'featured'
+                    ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 shadow-xs'
+                    : 'text-stone-400 hover:text-stone-200'
+                }`}
+                title="Featured Specials First"
+              >
+                ★ Featured
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Categories Horizontal Tabs */}
-        <CategoryTabs
-          categories={categories}
-          selectedCategoryId={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-        />
-
-        {/* Menu Section Title */}
-        <div className="pt-2 flex items-center justify-between">
-          <h2 className="text-sm font-black uppercase tracking-wider text-[#00F5D4] flex items-center gap-2">
-            <span className="w-1.5 h-4 bg-[#00F5D4] rounded-full inline-block box-glow-green" />
+        {/* Menu Items Count Banner */}
+        <div className="flex items-center justify-between text-xs px-1 text-stone-400 font-semibold">
+          <span>
             {selectedCategory === 'ALL'
-              ? 'Full Menu'
-              : categories.find((c) => c.id === selectedCategory)?.name || 'Category'}
-          </h2>
-          <span className="text-xs font-semibold text-stone-400">
-            {isLoading ? 'Syncing menu...' : `${filteredProducts.length} ${filteredProducts.length === 1 ? 'item' : 'items'}`}
+              ? `Showing all ${totalVisibleCount} items organized category-wise`
+              : `${totalVisibleCount} items in this category`}
+          </span>
+          <span className="text-[11px] text-amber-400 font-bold">
+            {sortBy === 'price_asc' && 'Sorted by lowest price'}
+            {sortBy === 'price_desc' && 'Sorted by highest price'}
+            {sortBy === 'featured' && 'Specials highlighted'}
           </span>
         </div>
 
-        {/* Product Cards List */}
-        {filteredProducts.length === 0 ? (
+        {/* Planned Category-Wise Menu Sections */}
+        {groupedMenu.length === 0 ? (
           <div className="bg-[#1F1512] rounded-3xl p-12 text-center border border-[#38241D] shadow-lg">
             <p className="text-sm font-bold text-white mb-1">No items found</p>
             <p className="text-xs text-stone-400">Try adjusting your search or category filter.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {filteredProducts.map((prod) => {
-              const cartItem = cart.find((i) => i.product.id === prod.id);
+          <div className="space-y-8">
+            {groupedMenu.map((group) => {
+              const minPrice = Math.min(...group.items.map((i) => i.price));
+              const maxPrice = Math.max(...group.items.map((i) => i.price));
+              const priceRangeStr =
+                minPrice === maxPrice
+                  ? `${cafe.currency}${minPrice.toFixed(0)}`
+                  : `${cafe.currency}${minPrice.toFixed(0)} – ${cafe.currency}${maxPrice.toFixed(0)}`;
+
               return (
-                <ProductCard
-                  key={prod.id}
-                  product={prod}
-                  currency={cafe.currency}
-                  cartQuantity={cartItem ? cartItem.quantity : 0}
-                  onAddToCart={handleAddToCart}
-                  onRemoveFromCart={handleRemoveFromCart}
-                  onClickDetail={setSelectedProduct}
-                />
+                <section
+                  key={group.category.id}
+                  id={`cat-section-${group.category.id}`}
+                  className="space-y-3 scroll-mt-28"
+                >
+                  {/* Category Section Header */}
+                  <div className="bg-gradient-to-r from-[#221612] to-[#1A100D] border border-[#38241D] rounded-2xl p-3.5 shadow-sm flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-[#00F5D4] box-glow-green" />
+                        <h2 className="text-base font-black text-white tracking-tight leading-none">
+                          {group.category.name}
+                        </h2>
+                      </div>
+                      {group.category.description && (
+                        <p className="text-xs text-stone-400 font-medium mt-1 line-clamp-1">
+                          {group.category.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="inline-block bg-[#2C1D18] text-[#00F5D4] text-[11px] font-black px-2.5 py-1 rounded-xl border border-[#442B23]">
+                        {group.items.length} {group.items.length === 1 ? 'item' : 'items'} • {priceRangeStr}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Category Items Grid (Sorted Price-wise) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {group.items.map((prod) => {
+                      const cartItem = cart.find((i) => i.product.id === prod.id);
+                      return (
+                        <ProductCard
+                          key={prod.id}
+                          product={prod}
+                          currency={cafe.currency}
+                          cartQuantity={cartItem ? cartItem.quantity : 0}
+                          onAddToCart={handleAddToCart}
+                          onRemoveFromCart={handleRemoveFromCart}
+                          onClickDetail={setSelectedProduct}
+                        />
+                      );
+                    })}
+                  </div>
+                </section>
               );
             })}
           </div>

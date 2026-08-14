@@ -23,7 +23,7 @@ export const getMenuByTableToken = async (req: Request, res: Response, next: Nex
       return res.status(404).json({ error: 'Invalid or inactive table QR code. Please contact cafe staff.' });
     }
 
-    // Fetch active categories with available products for this cafe
+    // Fetch active categories with available products for this cafe (sorted price-wise)
     const categories = await prisma.category.findMany({
       where: {
         cafeId: table.cafeId,
@@ -33,12 +33,12 @@ export const getMenuByTableToken = async (req: Request, res: Response, next: Nex
       include: {
         products: {
           where: { isAvailable: true },
-          orderBy: { name: 'asc' },
+          orderBy: { price: 'asc' },
         },
       },
     });
 
-    // Also fetch all available products for direct menu display
+    // Also fetch all available products organized category-wise & price-wise (lowest to highest)
     const products = await prisma.product.findMany({
       where: {
         cafeId: table.cafeId,
@@ -47,7 +47,11 @@ export const getMenuByTableToken = async (req: Request, res: Response, next: Nex
       include: {
         category: true,
       },
-      orderBy: { name: 'asc' },
+      orderBy: [
+        { category: { sortOrder: 'asc' } },
+        { price: 'asc' },
+        { name: 'asc' },
+      ],
     });
 
     res.json({
