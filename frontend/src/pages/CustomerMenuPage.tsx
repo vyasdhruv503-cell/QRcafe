@@ -151,7 +151,6 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
 
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [isVegOnly, setIsVegOnly] = useState<boolean>(false);
   const [sortBy, setSortBy] = useState<SortMode>('price_asc');
 
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -277,14 +276,13 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
 
   // Planned Category-wise & Price-wise Grouping
   const groupedMenu = useMemo(() => {
-    // 1. Filter base products by search and veg filter
+    // 1. Filter base products by search
     const matchesFilter = (p: Product) => {
       const matchesSearch =
         searchQuery.trim() === '' ||
         p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchesVeg = !isVegOnly || p.isVeg;
-      return matchesSearch && matchesVeg;
+      return matchesSearch;
     };
 
     if (selectedCategory === 'ALL') {
@@ -315,7 +313,7 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
           ]
         : [];
     }
-  }, [products, categories, selectedCategory, searchQuery, isVegOnly, sortBy]);
+  }, [products, categories, selectedCategory, searchQuery, sortBy]);
 
   const totalVisibleCount = useMemo(() => {
     return groupedMenu.reduce((acc, g) => acc + g.items.length, 0);
@@ -364,24 +362,11 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
 
         {/* Filter & Sorting Controls Bar */}
         <div className="flex flex-wrap items-center justify-between gap-2 pt-1 pb-1">
-          {/* Veg Only Toggle */}
-          <button
-            onClick={() => setIsVegOnly(!isVegOnly)}
-            className={`px-3 py-1.5 rounded-2xl text-xs font-black transition-all flex items-center gap-1.5 shrink-0 border active:scale-95 ${
-              isVegOnly
-                ? 'bg-gradient-to-r from-[#00F5D4] to-[#10B981] text-[#140D0B] border-[#00F5D4] box-glow-green'
-                : 'bg-[#1F1512] text-stone-300 border-[#38241D] hover:bg-[#2A1D18]'
-            }`}
-          >
-            <span
-              className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center p-[2px] ${
-                isVegOnly ? 'border-[#140D0B]' : 'border-[#00F5D4]'
-              }`}
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${isVegOnly ? 'bg-[#140D0B]' : 'bg-[#00F5D4]'}`} />
-            </span>
-            <span>Pure Veg</span>
-          </button>
+          {/* 100% Pure Veg Store Guarantee Badge */}
+          <div className="flex items-center gap-1.5 bg-[#1F1512] border border-[#38241D] px-3 py-1.5 rounded-2xl text-[11px] font-bold text-emerald-400">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+            <span>100% Pure Vegetarian</span>
+          </div>
 
           {/* Price Sorting Selector */}
           <div className="flex items-center gap-1.5 ml-auto">
