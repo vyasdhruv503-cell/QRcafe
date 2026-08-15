@@ -15,45 +15,59 @@ export const getDashboardMetrics = async (req: Request, res: Response, next: Nex
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
 
-    // Today's total sales
-    const todaySalesAgg = await prisma.order.aggregate({
-      _sum: { total: true },
-      where: {
-        cafeId,
-        createdAt: { gte: startOfToday },
-        orderStatus: { not: 'CANCELLED' },
-      },
-    });
-
-    // Orders counts by status
-    const totalOrdersCount = await prisma.order.count({ where: { cafeId } });
-    const todayOrdersCount = await prisma.order.count({
-      where: { cafeId, createdAt: { gte: startOfToday } },
-    });
-    const pendingCount = await prisma.order.count({ where: { cafeId, orderStatus: 'PENDING' } });
-    const preparingCount = await prisma.order.count({
-      where: { cafeId, orderStatus: { in: ['ACCEPTED', 'PREPARING'] } },
-    });
-    const completedCount = await prisma.order.count({ where: { cafeId, orderStatus: 'COMPLETED' } });
-    const totalProductsCount = await prisma.product.count({ where: { cafeId } });
-    const totalTablesCount = await prisma.cafeTable.count({ where: { cafeId, isActive: true } });
-
-    // Recent 7 Days Sales Trend for Recharts
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
     sevenDaysAgo.setHours(0, 0, 0, 0);
 
-    const recentOrders = await prisma.order.findMany({
-      where: {
-        cafeId,
-        createdAt: { gte: sevenDaysAgo },
-        orderStatus: { not: 'CANCELLED' },
-      },
-      select: {
-        total: true,
-        createdAt: true,
-      },
-    });
+    // Execute all dashboard database operations in parallel
+    const [
+      todaySalesAgg,
+      totalOrdersCount,
+      todayOrdersCount,
+      pendingCount,
+      preparingCount,
+      completedCount,
+      totalProductsCount,
+      totalTablesCount,
+      recentOrders,
+      topItems,
+    ] = await Promise.all([
+      prisma.order.aggregate({
+        _sum: { total: true },
+        where: {
+          cafeId,
+          createdAt: { gte: startOfToday },
+          orderStatus: { not: 'CANCELLED' },
+        },
+      }),
+      prisma.order.count({ where: { cafeId } }),
+      prisma.order.count({ where: { cafeId, createdAt: { gte: startOfToday } } }),
+      prisma.order.count({ where: { cafeId, orderStatus: 'PENDING' } }),
+      prisma.order.count({ where: { cafeId, orderStatus: { in: ['ACCEPTED', 'PREPARING'] } } }),
+      prisma.order.count({ where: { cafeId, orderStatus: 'COMPLETED' } }),
+      prisma.product.count({ where: { cafeId } }),
+      prisma.cafeTable.count({ where: { cafeId, isActive: true } }),
+      prisma.order.findMany({
+        where: {
+          cafeId,
+          createdAt: { gte: sevenDaysAgo },
+          orderStatus: { not: 'CANCELLED' },
+        },
+        select: {
+          total: true,
+          createdAt: true,
+        },
+      }),
+      prisma.orderItem.groupBy({
+        by: ['productNameSnapshot'],
+        _sum: { quantity: true, subtotal: true },
+        where: {
+          order: { cafeId, orderStatus: { not: 'CANCELLED' } },
+        },
+        orderBy: { _sum: { quantity: 'desc' } },
+        take: 5,
+      }),
+    ]);
 
     const salesMap = new Map<string, { date: string; sales: number; orders: number }>();
     for (let i = 0; i < 7; i++) {
@@ -73,17 +87,6 @@ export const getDashboardMetrics = async (req: Request, res: Response, next: Nex
     }
 
     const salesTrend = Array.from(salesMap.values());
-
-    // Top Selling Products
-    const topItems = await prisma.orderItem.groupBy({
-      by: ['productNameSnapshot'],
-      _sum: { quantity: true, subtotal: true },
-      where: {
-        order: { cafeId, orderStatus: { not: 'CANCELLED' } },
-      },
-      orderBy: { _sum: { quantity: 'desc' } },
-      take: 5,
-    });
 
     res.json({
       metrics: {

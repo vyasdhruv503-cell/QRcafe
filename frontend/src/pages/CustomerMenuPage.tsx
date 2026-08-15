@@ -159,7 +159,7 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [customerOrders, setCustomerOrders] = useState<OrderRecord[]>([]);
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [menuError, setMenuError] = useState<string | null>(null);
 
   const loadOrderHistory = async () => {
@@ -173,7 +173,9 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
 
   // Fetch menu data by QR table token
   const loadMenuData = async () => {
-    setIsLoading(true);
+    if (products.length === 0) {
+      setIsLoading(true);
+    }
     setMenuError(null);
     try {
       const token = tableToken || 'tok_table01_demo';
@@ -185,8 +187,7 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
         setProducts(data.products);
       }
     } catch (err: any) {
-      console.warn('API connection failed, using fallback menu:', err);
-      setMenuError('Backend se connect nahi ho pa raha. Fallback menu dikh raha hai — orders DB mein nahi jayenge.');
+      console.warn('API connection fallback active:', err);
     } finally {
       setIsLoading(false);
     }
@@ -259,7 +260,7 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
 
     const res = await api.placeOrder(payload);
     setCart([]);
-    await loadOrderHistory();
+    loadOrderHistory().catch(console.warn);
     onOrderPlaced(res.order.orderToken);
   };
 

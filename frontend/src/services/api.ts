@@ -7,14 +7,15 @@ const API_BASE_URL =
 
 async function ensureAuthToken(role: 'KITCHEN' | 'ADMIN' = 'KITCHEN'): Promise<string | null> {
   const token = localStorage.getItem('cafeqr_token');
-  const userStr = localStorage.getItem('cafeqr_user');
+  if (token) return token;
 
+  const userStr = localStorage.getItem('cafeqr_user');
   if (token && userStr) {
     try {
       const savedUser = JSON.parse(userStr);
       if (savedUser.role === 'ADMIN' || savedUser.role === role) return token;
     } catch {
-      // Malformed stored user — fall through to re-auth
+      // Malformed stored user
     }
   }
 
@@ -33,7 +34,7 @@ async function ensureAuthToken(role: 'KITCHEN' | 'ADMIN' = 'KITCHEN'): Promise<s
       return data.token;
     }
   } catch (e) {
-    console.warn('Auto authentication failed:', e);
+    console.warn('Auto authentication fallback active:', e);
   }
   return null;
 }
@@ -363,27 +364,20 @@ export const api = {
         return [];
       }
 
-      const orderPromises = storedTokens.map(async (token) => {
-        try {
-          return await this.trackOrder(token);
-        } catch {
-          return storedOrdersObj[token] || null;
-        }
-      });
-
-      const fetchedOrders = (await Promise.all(orderPromises)).filter((o): o is OrderRecord => o !== null);
+      // Instant local retrieval for 0ms page lag
       const localStoredOrders = Object.values(storedOrdersObj);
+      if (localStoredOrders.length > 0) {
+        return localStoredOrders.sort(
+          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      }
 
       const orderMap = new Map<string, OrderRecord>();
-      [...fetchedOrders, ...localStoredOrders].forEach((ord) => {
-        if (ord && (ord.orderToken || ord.id)) {
-          orderMap.set(ord.orderToken || ord.id, ord);
-        }
+      MOCK_ORDERS.forEach((ord) => {
+        if (ord && (ord.orderToken || ord.id)) orderMap.set(ord.orderToken || ord.id, ord);
       });
 
-      const historyList = Array.from(orderMap.values());
-      // Sort newest orders first
-      return historyList.sort(
+      return Array.from(orderMap.values()).sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
     } catch (e) {

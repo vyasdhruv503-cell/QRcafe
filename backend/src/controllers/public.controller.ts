@@ -23,36 +23,52 @@ export const getMenuByTableToken = async (req: Request, res: Response, next: Nex
       return res.status(404).json({ error: 'Invalid or inactive table QR code. Please contact cafe staff.' });
     }
 
-    // Fetch active categories with available products for this cafe (sorted price-wise)
-    const categories = await prisma.category.findMany({
-      where: {
-        cafeId: table.cafeId,
-        isActive: true,
-      },
-      orderBy: { sortOrder: 'asc' },
-      include: {
-        products: {
-          where: { isAvailable: true },
-          orderBy: { price: 'asc' },
+    // Fetch active categories and all products in parallel with lightweight queries
+    const [categories, products] = await Promise.all([
+      prisma.category.findMany({
+        where: {
+          cafeId: table.cafeId,
+          isActive: true,
         },
-      },
-    });
-
-    // Also fetch all available products organized category-wise & price-wise (lowest to highest)
-    const products = await prisma.product.findMany({
-      where: {
-        cafeId: table.cafeId,
-        isAvailable: true,
-      },
-      include: {
-        category: true,
-      },
-      orderBy: [
-        { category: { sortOrder: 'asc' } },
-        { price: 'asc' },
-        { name: 'asc' },
-      ],
-    });
+        orderBy: { sortOrder: 'asc' },
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          image: true,
+          sortOrder: true,
+        },
+      }),
+      prisma.product.findMany({
+        where: {
+          cafeId: table.cafeId,
+          isAvailable: true,
+        },
+        select: {
+          id: true,
+          categoryId: true,
+          name: true,
+          description: true,
+          price: true,
+          image: true,
+          isAvailable: true,
+          isFeatured: true,
+          preparationTime: true,
+          isVeg: true,
+          category: {
+            select: {
+              name: true,
+              sortOrder: true,
+            },
+          },
+        },
+        orderBy: [
+          { category: { sortOrder: 'asc' } },
+          { price: 'asc' },
+          { name: 'asc' },
+        ],
+      }),
+    ]);
 
     res.json({
       cafe: {
@@ -71,13 +87,7 @@ export const getMenuByTableToken = async (req: Request, res: Response, next: Nex
         capacity: table.capacity,
         qrToken: table.qrToken,
       },
-      categories: categories.map((cat) => ({
-        id: cat.id,
-        name: cat.name,
-        description: cat.description,
-        image: cat.image,
-        sortOrder: cat.sortOrder,
-      })),
+      categories,
       products: products.map((prod) => ({
         id: prod.id,
         categoryId: prod.categoryId,
