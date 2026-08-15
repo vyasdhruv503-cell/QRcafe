@@ -904,14 +904,48 @@ export const api = {
       const headers = await getAuthHeaders('KITCHEN');
       const res = await fetch(`${API_BASE_URL}/kitchen/orders`, { headers });
       const apiOrders = await handleResponse<OrderRecord[]>(res);
-      return Array.isArray(apiOrders) ? apiOrders : [];
+      if (Array.isArray(apiOrders)) {
+        return apiOrders;
+      }
+      return [];
     } catch (err) {
-      console.warn('Kitchen orders endpoint failed, returning local orders:', err);
-      return MOCK_ORDERS;
+      console.warn('Kitchen orders endpoint failed, returning local active orders:', err);
+      const storedOrdersObj = JSON.parse(localStorage.getItem('cafeqr_customer_orders_data') || '{}');
+      const localOrders = Object.values(storedOrdersObj) as OrderRecord[];
+      const combined = [...localOrders, ...MOCK_ORDERS];
+      const uniqueMap = new Map<string, OrderRecord>();
+      combined.forEach((o) => {
+        if (o && (o.id || o.orderToken)) {
+          const key = o.id || o.orderToken;
+          if (!uniqueMap.has(key)) uniqueMap.set(key, o);
+        }
+      });
+      const activeList = Array.from(uniqueMap.values()).filter((o) =>
+        ['PENDING', 'ACCEPTED', 'PREPARING', 'READY'].includes(o.orderStatus)
+      );
+      return activeList.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
     }
   },
 
   async advanceKitchenStatus(id: string, nextStatus: string): Promise<OrderRecord> {
+    const updateLocalState = () => {
+      try {
+        const storedOrdersObj = JSON.parse(localStorage.getItem('cafeqr_customer_orders_data') || '{}');
+        Object.keys(storedOrdersObj).forEach((k) => {
+          if (k === id || storedOrdersObj[k].id === id || storedOrdersObj[k].orderToken === id) {
+            storedOrdersObj[k].orderStatus = nextStatus as any;
+          }
+        });
+        localStorage.setItem('cafeqr_customer_orders_data', JSON.stringify(storedOrdersObj));
+      } catch {}
+
+      const idx = MOCK_ORDERS.findIndex((o) => o.id === id || o.orderToken === id);
+      if (idx !== -1) {
+        MOCK_ORDERS[idx].orderStatus = nextStatus as any;
+        saveMockState('cafeqr_mock_orders', MOCK_ORDERS);
+      }
+    };
+
     try {
       const headers = await getAuthHeaders('KITCHEN');
       const res = await fetch(`${API_BASE_URL}/kitchen/orders/${id}/status`, {
@@ -919,9 +953,15 @@ export const api = {
         headers,
         body: JSON.stringify({ nextStatus }),
       });
-      return await handleResponse(res);
+      const data = await handleResponse<OrderRecord>(res);
+      updateLocalState();
+      return data;
     } catch (err) {
-      throw err;
+      console.warn('Backend advanceKitchenStatus failed, updating local state:', err);
+      updateLocalState();
+      const found = MOCK_ORDERS.find((o) => o.id === id || o.orderToken === id);
+      if (found) return found;
+      return { id, orderStatus: nextStatus } as any;
     }
   },
 };

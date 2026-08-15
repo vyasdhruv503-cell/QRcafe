@@ -9,7 +9,14 @@ interface KitchenOrderCardProps {
 }
 
 export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onAdvanceStatus }) => {
-  const isUrgent = (order.elapsedMinutes || 0) > 15;
+  const elapsed =
+    order.elapsedMinutes !== undefined && !isNaN(order.elapsedMinutes)
+      ? order.elapsedMinutes
+      : order.createdAt
+      ? Math.max(0, Math.floor((Date.now() - new Date(order.createdAt).getTime()) / (1000 * 60)))
+      : 0;
+
+  const isUrgent = elapsed > 15;
 
   const nextStatusConfig: Record<string, { label: string; next: string; icon: any; variant: any }> = {
     PENDING: { label: 'Accept Order', next: 'ACCEPTED', icon: CheckCircle2, variant: 'primary' },
@@ -19,6 +26,7 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onAdv
   };
 
   const config = nextStatusConfig[order.orderStatus];
+  const itemsList = Array.isArray(order.items) ? order.items : [];
 
   return (
     <div
@@ -31,7 +39,7 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onAdv
         <div className="flex items-center justify-between border-b border-[#E2DCD5] pb-3 mb-3">
           <div>
             <span className="text-[11px] font-bold text-stone-500">Order #{order.orderNumber}</span>
-            <h3 className="text-lg font-black text-[#10B981] leading-tight">{order.tableNumber}</h3>
+            <h3 className="text-lg font-black text-[#10B981] leading-tight">{order.tableNumber || 'Table'}</h3>
           </div>
 
           <div
@@ -42,7 +50,7 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onAdv
             }`}
           >
             <Clock className="w-3.5 h-3.5 text-[#10B981]" />
-            {order.elapsedMinutes || 0}m ago
+            {elapsed}m ago
           </div>
         </div>
 
@@ -59,8 +67,8 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onAdv
 
         {/* Itemized Order List */}
         <div className="space-y-2 mb-4">
-          {order.items.map((item) => (
-            <div key={item.id} className="flex items-start justify-between text-xs">
+          {itemsList.map((item, idx) => (
+            <div key={item.id || idx} className="flex items-start justify-between text-xs">
               <div className="flex items-start gap-2">
                 <span className="w-5 h-5 rounded-md bg-emerald-50 border border-emerald-200 text-[#10B981] font-black flex items-center justify-center text-[10px] shrink-0">
                   {item.quantity}x
@@ -84,7 +92,7 @@ export const KitchenOrderCard: React.FC<KitchenOrderCardProps> = ({ order, onAdv
             variant={config.variant}
             size="sm"
             className="w-full py-2.5 text-xs flex items-center justify-center gap-1.5 font-bold"
-            onClick={() => onAdvanceStatus(order.id, config.next)}
+            onClick={() => onAdvanceStatus(order.id || order.orderToken, config.next)}
           >
             <config.icon className="w-4 h-4" />
             {config.label}
