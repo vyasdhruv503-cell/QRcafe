@@ -535,6 +535,14 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
         onSelectOrder={(token) => {
           onOrderPlaced(token);
         }}
+        onDeleteOrder={(token) => {
+          api.deleteCustomerOrderFromHistory(token);
+          loadOrderHistory();
+        }}
+        onClearHistory={() => {
+          api.clearCustomerOrderHistory();
+          setCustomerOrders([]);
+        }}
       />
     </div>
   );

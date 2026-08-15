@@ -18,6 +18,7 @@ import {
   generateQRCodeDataUrl,
   getAdminOrders,
   updateOrderStatus,
+  deleteOrder,
   getStaffList,
   createStaff,
   deleteStaff,
@@ -57,6 +58,7 @@ router.get('/tables/qr-image/:qrToken', generateQRCodeDataUrl);
 // Order Management
 router.get('/orders', getAdminOrders);
 router.patch('/orders/:id/status', updateOrderStatus);
+router.delete('/orders/:id', deleteOrder);
 
 // Staff Management
 router.get('/staff', getStaffList);

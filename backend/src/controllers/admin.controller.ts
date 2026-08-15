@@ -552,6 +552,30 @@ export const updateOrderStatus = async (req: Request, res: Response, next: NextF
   }
 };
 
+export const deleteOrder = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const cafeId = req.user!.cafeId;
+    const { id } = req.params;
+
+    const existing = await prisma.order.findFirst({
+      where: {
+        cafeId,
+        OR: [{ id }, { orderToken: id }],
+      },
+    });
+    if (!existing) return res.status(404).json({ error: 'Order not found.' });
+
+    // Cleanly cascade delete child relations
+    await prisma.payment.deleteMany({ where: { orderId: existing.id } });
+    await prisma.orderItem.deleteMany({ where: { orderId: existing.id } });
+    await prisma.order.delete({ where: { id: existing.id } });
+
+    res.json({ message: 'Order deleted successfully.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // --- Staff Management ---
 export const getStaffList = async (req: Request, res: Response, next: NextFunction) => {
   try {

@@ -21,6 +21,7 @@ interface OrderHistoryModalProps {
   onSelectOrder: (orderToken: string) => void;
   onReOrder?: (items: { productId?: string; productName: string; price: number; quantity: number }[]) => void;
   onClearHistory?: () => void;
+  onDeleteOrder?: (orderToken: string) => void;
 }
 
 export const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
@@ -30,6 +31,7 @@ export const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
   onSelectOrder,
   onReOrder,
   onClearHistory,
+  onDeleteOrder,
 }) => {
   const [activeTab, setActiveTab] = useState<'ALL' | 'ACTIVE' | 'COMPLETED'>('ALL');
   const [expandedOrderToken, setExpandedOrderToken] = useState<string | null>(null);
@@ -231,7 +233,22 @@ export const OrderHistoryModal: React.FC<OrderHistoryModalProps> = ({
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
+                        {onDeleteOrder && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Delete Order #${ord.orderNumber} from history?`)) {
+                                onDeleteOrder(ord.orderToken || ord.id);
+                              }
+                            }}
+                            className="p-1.5 bg-[#2B1C17] hover:bg-rose-950/60 text-stone-400 hover:text-rose-400 rounded-xl border border-[#482F26] hover:border-rose-600/40 text-xs font-semibold flex items-center transition-all"
+                            title="Delete this order from history"
+                          >
+                            <Trash2Icon className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+
                         <button
                           onClick={(e) => toggleExpand(ord.orderToken, e)}
                           className="p-1.5 bg-[#2B1C17] hover:bg-[#38241D] text-stone-300 rounded-xl border border-[#482F26] text-xs font-semibold flex items-center gap-1 transition-all"

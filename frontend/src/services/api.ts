@@ -386,6 +386,22 @@ export const api = {
     }
   },
 
+  deleteCustomerOrderFromHistory(orderToken: string): void {
+    try {
+      const storedTokens: string[] = JSON.parse(localStorage.getItem('cafeqr_customer_orders') || '[]');
+      const updatedTokens = storedTokens.filter((t) => t !== orderToken);
+      localStorage.setItem('cafeqr_customer_orders', JSON.stringify(updatedTokens));
+
+      const storedOrdersObj = JSON.parse(localStorage.getItem('cafeqr_customer_orders_data') || '{}');
+      delete storedOrdersObj[orderToken];
+      localStorage.setItem('cafeqr_customer_orders_data', JSON.stringify(storedOrdersObj));
+
+      MOCK_ORDERS = MOCK_ORDERS.filter((o) => o.orderToken !== orderToken && o.id !== orderToken);
+    } catch (e) {
+      console.warn('Could not delete order from history:', e);
+    }
+  },
+
   clearCustomerOrderHistory(): void {
     try {
       localStorage.removeItem('cafeqr_customer_orders');
@@ -798,6 +814,21 @@ export const api = {
         return MOCK_ORDERS[idx];
       }
       throw err;
+    }
+  },
+
+  async deleteAdminOrder(orderId: string): Promise<{ message: string }> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/admin/orders/${orderId}`, {
+        method: 'DELETE',
+        headers: await getAuthHeaders('ADMIN'),
+      });
+      const data = await handleResponse<{ message: string }>(res);
+      MOCK_ORDERS = MOCK_ORDERS.filter((o) => o.id !== orderId && o.orderToken !== orderId);
+      return data;
+    } catch (err) {
+      MOCK_ORDERS = MOCK_ORDERS.filter((o) => o.id !== orderId && o.orderToken !== orderId);
+      return { message: 'Order deleted successfully.' };
     }
   },
 

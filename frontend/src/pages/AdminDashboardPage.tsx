@@ -87,7 +87,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
 
   // Confirmation Delete Dialog
   const [deleteConfirm, setDeleteConfirm] = useState<{
-    type: 'product' | 'category' | 'staff';
+    type: 'product' | 'category' | 'staff' | 'order';
     id: string;
     name: string;
   } | null>(null);
@@ -308,6 +308,8 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       await api.deleteCategory(deleteConfirm.id);
     } else if (deleteConfirm.type === 'staff') {
       await api.deleteStaff(deleteConfirm.id);
+    } else if (deleteConfirm.type === 'order') {
+      await api.deleteAdminOrder(deleteConfirm.id);
     }
     setDeleteConfirm(null);
     loadTabData();
@@ -940,22 +942,37 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                           <td className="p-4">
                             <StatusBadge status={o.orderStatus} />
                           </td>
-                          <td className="p-4 text-right">
-                            <select
-                              value={o.orderStatus}
-                              onChange={async (e) => {
-                                await api.updateOrderStatus(o.id, e.target.value);
-                                loadTabData();
-                              }}
-                              className="bg-[#FAF7F2] border border-[#E2DCD5] rounded-xl px-2.5 py-1 text-xs font-bold text-stone-800 focus:outline-none focus:border-[#10B981]"
-                            >
-                              <option value="PENDING" className="bg-white text-stone-800">PENDING</option>
-                              <option value="ACCEPTED" className="bg-white text-stone-800">ACCEPTED</option>
-                              <option value="PREPARING" className="bg-white text-stone-800">PREPARING</option>
-                              <option value="READY" className="bg-white text-stone-800">READY</option>
-                              <option value="COMPLETED" className="bg-white text-stone-800">COMPLETED</option>
-                              <option value="CANCELLED" className="bg-white text-stone-800">CANCELLED</option>
-                            </select>
+                          <td className="p-4 text-right whitespace-nowrap">
+                            <div className="inline-flex items-center justify-end gap-2">
+                              <select
+                                value={o.orderStatus}
+                                onChange={async (e) => {
+                                  await api.updateOrderStatus(o.id, e.target.value);
+                                  loadTabData();
+                                }}
+                                className="bg-[#FAF7F2] border border-[#E2DCD5] rounded-xl px-2.5 py-1 text-xs font-bold text-stone-800 focus:outline-none focus:border-[#10B981]"
+                              >
+                                <option value="PENDING" className="bg-white text-stone-800">PENDING</option>
+                                <option value="ACCEPTED" className="bg-white text-stone-800">ACCEPTED</option>
+                                <option value="PREPARING" className="bg-white text-stone-800">PREPARING</option>
+                                <option value="READY" className="bg-white text-stone-800">READY</option>
+                                <option value="COMPLETED" className="bg-white text-stone-800">COMPLETED</option>
+                                <option value="CANCELLED" className="bg-white text-stone-800">CANCELLED</option>
+                              </select>
+                              <button
+                                onClick={() =>
+                                  setDeleteConfirm({
+                                    type: 'order',
+                                    id: o.id,
+                                    name: `Order #${o.orderNumber} (${o.tableNumber})`,
+                                  })
+                                }
+                                className="p-1.5 hover:bg-rose-50 text-rose-600 rounded-lg transition-colors"
+                                title="Delete Order from History"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))
