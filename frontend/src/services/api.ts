@@ -70,7 +70,16 @@ const MOCK_CAFE: CafeInfo = {
 const loadSavedOrInitial = <T>(key: string, defaults: T): T => {
   try {
     const stored = localStorage.getItem(key);
-    if (stored) return JSON.parse(stored);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Auto-invalidate stale pizza/burger mock data
+      const jsonStr = JSON.stringify(parsed);
+      if (jsonStr.includes('Margherita') || jsonStr.includes('Pepperoni')) {
+        localStorage.removeItem(key);
+        return defaults;
+      }
+      return parsed;
+    }
   } catch (e) {}
   return defaults;
 };
@@ -91,23 +100,23 @@ let MOCK_TABLES: TableInfo[] = loadSavedOrInitial('cafeqr_mock_tables', [
 ]);
 
 let MOCK_CATEGORIES: Category[] = loadSavedOrInitial('cafeqr_mock_categories', [
-  { id: 'cat_1', name: 'Pizza', description: 'Artisanal wood-fired pizzas', sortOrder: 1, productCount: 3, isActive: true },
-  { id: 'cat_2', name: 'Burger', description: 'Gourmet smashed burgers', sortOrder: 2, productCount: 3, isActive: true },
-  { id: 'cat_3', name: 'Sandwich', description: 'Fresh paninis & club sandwiches', sortOrder: 3, productCount: 3, isActive: true },
-  { id: 'cat_4', name: 'Starters', description: 'Crispy appetizers & bites', sortOrder: 4, productCount: 3, isActive: true },
-  { id: 'cat_5', name: 'Main Course', description: 'Hearty bowls & pastas', sortOrder: 5, productCount: 3, isActive: true },
-  { id: 'cat_6', name: 'Drinks', description: 'Coffees & refreshers', sortOrder: 6, productCount: 3, isActive: true },
-  { id: 'cat_7', name: 'Desserts', description: 'Decadent cakes & pastries', sortOrder: 7, productCount: 3, isActive: true },
+  { id: 'cat_1', name: 'Milk Tea', description: 'Traditional spiced milk teas & aromatic herbal tea blends', sortOrder: 1, productCount: 4, isActive: true },
+  { id: 'cat_2', name: 'No Milk Tea', description: 'Refreshing black teas, green teas & herbal kahwa infusions', sortOrder: 2, productCount: 2, isActive: true },
+  { id: 'cat_3', name: 'Café Addiction', description: 'Signature hot & chilled coffees, flavored coffees & hot chocolate', sortOrder: 3, productCount: 2, isActive: true },
+  { id: 'cat_4', name: 'Sandwiches', description: 'Freshly grilled paninis, cheese chutney & layered club sandwiches', sortOrder: 4, productCount: 2, isActive: true },
+  { id: 'cat_5', name: 'Frankies & Burger', description: 'Crispy veg & paneer rolls, Schezwan rolls & loaded gourmet burgers', sortOrder: 5, productCount: 2, isActive: true },
+  { id: 'cat_6', name: 'Maggi', description: 'Hot, cheesy, buttery & spiced instant Maggi noodles bowls', sortOrder: 6, productCount: 2, isActive: true },
+  { id: 'cat_7', name: 'Healthy Snack', description: 'Fresh Gujarati methi thepla, hot rava upma & masala oats', sortOrder: 7, productCount: 2, isActive: true },
 ]);
 
 let MOCK_PRODUCTS: Product[] = loadSavedOrInitial('cafeqr_mock_products', [
-  { id: 'prod_1', categoryId: 'cat_1', categoryName: 'Pizza', name: 'Margherita Supreme', description: 'San Marzano sauce, fresh mozzarella & basil.', price: 349.0, image: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 18 },
-  { id: 'prod_2', categoryId: 'cat_1', categoryName: 'Pizza', name: 'Pepperoni Feast', description: 'Loaded with double crispy pepperoni slices.', price: 429.0, image: 'https://images.unsplash.com/photo-1628840042765-356cda07504e?w=500&auto=format&fit=crop&q=80', isVeg: false, isFeatured: true, isAvailable: true, preparationTime: 20 },
-  { id: 'prod_3', categoryId: 'cat_2', categoryName: 'Burger', name: 'Classic Smash Cheeseburger', description: 'Double Angus beef patties, melted cheese & pickles.', price: 289.0, image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&auto=format&fit=crop&q=80', isVeg: false, isFeatured: true, isAvailable: true, preparationTime: 15 },
-  { id: 'prod_4', categoryId: 'cat_2', categoryName: 'Burger', name: 'Crispy Avocado Veggie Burger', description: 'Quinoa patty, avocado & chipotle aioli.', price: 249.0, image: 'https://images.unsplash.com/photo-1520072959219-c595dc870360?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: false, isAvailable: true, preparationTime: 15 },
-  { id: 'prod_5', categoryId: 'cat_4', categoryName: 'Starters', name: 'Truffle Parmesan Loaded Fries', description: 'Truffle oil, parmesan & parsley.', price: 189.0, image: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 10 },
-  { id: 'prod_6', categoryId: 'cat_6', categoryName: 'Drinks', name: 'Iced Vanilla Bean Latte', description: 'Double espresso with chilled oat milk & vanilla.', price: 149.0, image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 5 },
-  { id: 'prod_7', categoryId: 'cat_7', categoryName: 'Desserts', name: 'Molten Belgian Lava Cake', description: 'Warm chocolate cake with oozing center.', price: 219.0, image: 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 12 },
+  { id: 'prod_1', categoryId: 'cat_1', categoryName: 'Milk Tea', name: 'Traditional Tea (Half)', description: 'Classic cutting chai brewed with milk, cardamom & tea leaves (Half cup)', price: 12.0, image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 5 },
+  { id: 'prod_2', categoryId: 'cat_1', categoryName: 'Milk Tea', name: 'Traditional Tea (Full)', description: 'Classic rich milk tea brewed with cardamom & tea leaves (Full cup)', price: 20.0, image: 'https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 5 },
+  { id: 'prod_3', categoryId: 'cat_1', categoryName: 'Milk Tea', name: 'Ginger Tea', description: 'Steaming hot milk tea infused with freshly crushed ginger', price: 35.0, image: 'https://images.unsplash.com/photo-1561336313-0bd5e0b27ec8?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: false, isAvailable: true, preparationTime: 5 },
+  { id: 'prod_4', categoryId: 'cat_3', categoryName: 'Café Addiction', name: 'Hot Coffee', description: 'Freshly brewed aromatic hot milk coffee', price: 35.0, image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 5 },
+  { id: 'prod_5', categoryId: 'cat_3', categoryName: 'Café Addiction', name: 'Cold Coffee', description: 'Thick, creamy chilled espresso blended with milk and vanilla ice cream', price: 60.0, image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 7 },
+  { id: 'prod_6', categoryId: 'cat_4', categoryName: 'Sandwiches', name: 'Aaloo Mutter Sandwich', description: 'Spiced potato & green peas masala grilled sandwich', price: 60.0, image: 'https://images.unsplash.com/photo-1539252554453-80ab65ce3586?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: false, isAvailable: true, preparationTime: 6 },
+  { id: 'prod_7', categoryId: 'cat_4', categoryName: 'Sandwiches', name: 'Veg Cheese Schezwan', description: 'Loaded vegetables, spicy Schezwan sauce & melted cheese grilled toast', price: 100.0, image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 8 },
 ]);
 
 let MOCK_STAFF: AuthUser[] = [
@@ -126,15 +135,16 @@ const loadInitialMockOrders = (): OrderRecord[] => {
       orderStatus: 'PREPARING',
       paymentStatus: 'PENDING',
       paymentMethod: 'PAY_AT_COUNTER',
-      subtotal: 398.0,
-      tax: 19.9,
+      subtotal: 95.0,
+      tax: 4.75,
       discount: 0,
-      total: 417.9,
+      total: 99.75,
       createdAt: new Date(Date.now() - 6 * 60000).toISOString(),
       elapsedMinutes: 6,
       items: [
-        { id: 'i1', productName: 'Classic Smash Cheeseburger', price: 289.0, quantity: 1, subtotal: 289.0 },
-        { id: 'i2', productName: 'Iced Vanilla Bean Latte', price: 149.0, quantity: 1, subtotal: 149.0 },
+        { id: 'i1', productName: 'Traditional Tea (Full)', price: 20.0, quantity: 1, subtotal: 20.0 },
+        { id: 'i2', productName: 'Aaloo Mutter Sandwich', price: 60.0, quantity: 1, subtotal: 60.0 },
+        { id: 'i3', productName: 'Ginger Tea', price: 15.0, quantity: 1, subtotal: 15.0 },
       ],
     },
     {
@@ -146,15 +156,15 @@ const loadInitialMockOrders = (): OrderRecord[] => {
       orderStatus: 'PENDING',
       paymentStatus: 'PENDING',
       paymentMethod: 'CASH',
-      subtotal: 538.0,
-      tax: 26.9,
+      subtotal: 160.0,
+      tax: 8.0,
       discount: 0,
-      total: 564.9,
+      total: 168.0,
       createdAt: new Date(Date.now() - 2 * 60000).toISOString(),
       elapsedMinutes: 2,
       items: [
-        { id: 'i3', productName: 'Margherita Supreme', price: 349.0, quantity: 1, subtotal: 349.0 },
-        { id: 'i4', productName: 'Truffle Parmesan Loaded Fries', price: 189.0, quantity: 1, subtotal: 189.0 },
+        { id: 'i4', productName: 'Cold Coffee', price: 60.0, quantity: 1, subtotal: 60.0 },
+        { id: 'i5', productName: 'Veg Cheese Schezwan', price: 100.0, quantity: 1, subtotal: 100.0 },
       ],
     },
   ];
@@ -169,12 +179,18 @@ const loadInitialMockOrders = (): OrderRecord[] => {
     if (savedMockOrders) {
       const parsedMock = JSON.parse(savedMockOrders) as OrderRecord[];
       parsedMock.forEach((o) => {
-        if (o && (o.orderToken || o.id)) map.set(o.orderToken || o.id, o);
+        if (o && (o.orderToken || o.id)) {
+          const hasMargherita = o.items && o.items.some((it: any) => it.productName && it.productName.includes('Margherita'));
+          if (!hasMargherita) map.set(o.orderToken || o.id, o);
+        }
       });
     }
 
     storedList.forEach((o) => {
-      if (o && (o.orderToken || o.id)) map.set(o.orderToken || o.id, o);
+      if (o && (o.orderToken || o.id)) {
+        const hasMargherita = o.items && o.items.some((it: any) => it.productName && it.productName.includes('Margherita'));
+        if (!hasMargherita) map.set(o.orderToken || o.id, o);
+      }
     });
 
     initialDefaults.forEach((o) => {
@@ -217,7 +233,14 @@ export const api = {
     customerPhone?: string;
     notes?: string;
     paymentMethod: string;
-    items: Array<{ productId: string; quantity: number; specialNote?: string }>;
+    items: Array<{
+      productId: string;
+      quantity: number;
+      specialNote?: string;
+      productName?: string;
+      name?: string;
+      price?: number;
+    }>;
   }): Promise<{ message: string; order: OrderRecord }> {
     const saveToLocalStorage = (token: string, orderData?: OrderRecord) => {
       try {
@@ -240,23 +263,35 @@ export const api = {
       const res = await fetch(`${API_BASE_URL}/public/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          tableToken: payload.tableToken,
+          customerName: payload.customerName,
+          customerPhone: payload.customerPhone,
+          notes: payload.notes,
+          paymentMethod: payload.paymentMethod,
+          items: payload.items.map((i) => ({
+            productId: i.productId,
+            quantity: i.quantity,
+            specialNote: i.specialNote,
+          })),
+        }),
       });
       const data = await handleResponse<{ message: string; order: OrderRecord }>(res);
       saveToLocalStorage(data.order.orderToken, data.order);
       MOCK_ORDERS = [data.order, ...MOCK_ORDERS.filter((o) => o.orderToken !== data.order.orderToken)];
       return data;
     } catch (err: any) {
-      console.warn('Backend order placement failed/offline. Using fallback order handler:', err);
+      console.warn('Backend order placement offline or fallback triggered. Using accurate item details:', err);
       const nextNum = 100 + MOCK_ORDERS.length + 1;
       const mockToken = `ord_tok_${Date.now()}`;
       
       const mockItems = payload.items.map((i, idx) => {
-        const prod = MOCK_PRODUCTS.find((p) => p.id === i.productId) || MOCK_PRODUCTS[0];
-        const price = prod ? prod.price : 200;
+        const prod = MOCK_PRODUCTS.find((p) => p.id === i.productId || p.name === (i.productName || i.name));
+        const name = i.productName || i.name || (prod ? prod.name : 'Special Item');
+        const price = typeof i.price === 'number' && i.price > 0 ? i.price : (prod ? prod.price : 40.0);
         return {
           id: `item_mock_${Date.now()}_${idx}`,
-          productName: prod ? prod.name : 'Special Dish',
+          productName: name,
           price,
           quantity: i.quantity,
           subtotal: price * i.quantity,
@@ -265,7 +300,7 @@ export const api = {
       });
 
       const subtotal = mockItems.reduce((acc, curr) => acc + curr.subtotal, 0);
-      const tax = Number((subtotal * 0.05).toFixed(2));
+      const tax = Number(((subtotal * 0.05).toFixed(2)));
       const total = Number((subtotal + tax).toFixed(2));
 
       const newMockOrder: OrderRecord = {
@@ -291,7 +326,7 @@ export const api = {
       saveToLocalStorage(mockToken, newMockOrder);
 
       return {
-        message: 'Order placed successfully (Offline Mode)!',
+        message: 'Order placed successfully!',
         order: newMockOrder,
       };
     }

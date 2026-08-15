@@ -249,6 +249,9 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
       paymentMethod,
       items: cart.map((i) => ({
         productId: i.product.id,
+        productName: i.product.name,
+        name: i.product.name,
+        price: i.product.price,
         quantity: i.quantity,
         specialNote: i.specialNote,
       })),
@@ -426,7 +429,12 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
         </div>
 
         {/* Planned Category-Wise Menu Sections */}
-        {groupedMenu.length === 0 ? (
+        {isLoading ? (
+          <div className="bg-[#1F1512] rounded-3xl p-12 text-center border border-[#38241D] shadow-lg space-y-3">
+            <div className="w-10 h-10 border-4 border-[#00F5D4] border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="text-sm font-bold text-white">Loading Menu...</p>
+          </div>
+        ) : groupedMenu.length === 0 ? (
           <div className="bg-[#1F1512] rounded-3xl p-12 text-center border border-[#38241D] shadow-lg">
             <p className="text-sm font-bold text-white mb-1">No items found</p>
             <p className="text-xs text-stone-400">Try adjusting your search or category filter.</p>

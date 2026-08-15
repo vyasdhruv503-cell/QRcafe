@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type { OrderRecord } from '../types';
 import { api } from '../services/api';
 import { StatusBadge } from '../components/common/StatusBadge';
-import { CheckCircle2, Utensils, RefreshCw, ArrowLeft } from 'lucide-react';
+import { CheckCircle2, RefreshCw, ArrowLeft } from 'lucide-react';
 
 interface CustomerOrderTrackerPageProps {
   orderToken: string;
@@ -18,26 +18,33 @@ const FALLBACK_ORDER: OrderRecord = {
   orderStatus: 'PREPARING',
   paymentStatus: 'PENDING',
   paymentMethod: 'PAY_AT_COUNTER',
-  subtotal: 398.0,
-  tax: 19.9,
+  subtotal: 95.0,
+  tax: 4.75,
   discount: 0,
-  total: 417.9,
-  cafeName: 'My Cafe',
+  total: 99.75,
+  cafeName: 'TeaWala',
   createdAt: new Date().toISOString(),
   items: [
     {
       id: 'item_1',
-      productName: 'Margherita Supreme',
-      price: 349.0,
+      productName: 'Traditional Tea (Full)',
+      price: 20.0,
       quantity: 1,
-      subtotal: 349.0,
+      subtotal: 20.0,
     },
     {
       id: 'item_2',
-      productName: 'Iced Vanilla Bean Latte',
-      price: 149.0,
+      productName: 'Aaloo Mutter Sandwich',
+      price: 60.0,
       quantity: 1,
-      subtotal: 149.0,
+      subtotal: 60.0,
+    },
+    {
+      id: 'item_3',
+      productName: 'Ginger Tea',
+      price: 35.0,
+      quantity: 1,
+      subtotal: 35.0,
     },
   ],
 } as any;

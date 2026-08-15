@@ -49,7 +49,7 @@ export const QRPreviewModal: React.FC<QRPreviewModalProps> = ({
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Teacup QR Standee - ${table.number}</title>
+          <title>${cafe?.name || 'TeaWala'} QR Standee - ${table.number}</title>
           <style>
             @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap');
             * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }

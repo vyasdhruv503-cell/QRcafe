@@ -1,6 +1,6 @@
 import React from 'react';
 import type { CafeInfo, TableInfo } from '../../types';
-import { Utensils, MapPin, History } from 'lucide-react';
+import { History } from 'lucide-react';
 
 interface HeaderProps {
   cafe: CafeInfo;

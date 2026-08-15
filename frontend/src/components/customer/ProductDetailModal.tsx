@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import type { Product } from '../../types';
 import { Modal } from '../common/Modal';
-import { Button } from '../common/Button';
 import { Clock, Plus, Minus, FileText } from 'lucide-react';
 
 interface ProductDetailModalProps {

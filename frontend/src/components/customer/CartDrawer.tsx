@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import type { CartItem, CafeInfo, TableInfo } from '../../types';
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, User, Phone, FileText } from 'lucide-react';
-import { Button } from '../common/Button';
 
 interface CartDrawerProps {
   isOpen: boolean;

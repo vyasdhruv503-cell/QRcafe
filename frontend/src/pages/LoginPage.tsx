@@ -3,7 +3,7 @@ import { api } from '../services/api';
 import type { AuthUser } from '../types';
 import { Input } from '../components/common/Input';
 import { Button } from '../components/common/Button';
-import { QrCode, Lock, User, AlertCircle } from 'lucide-react';
+import { Lock, User, AlertCircle } from 'lucide-react';
 
 interface LoginPageProps {
   onLoginSuccess: (user: AuthUser) => void;

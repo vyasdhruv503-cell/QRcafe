@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import type { OrderRecord, AuthUser } from '../types';
 import { api } from '../services/api';
 import { KitchenOrderCard } from '../components/kitchen/KitchenOrderCard';
-import { ChefHat, RefreshCw, LogOut, ArrowLeft, ExternalLink } from 'lucide-react';
+import { RefreshCw, LogOut, ArrowLeft, ExternalLink } from 'lucide-react';
 import { Button } from '../components/common/Button';
 
 interface KitchenKDSPageProps {
