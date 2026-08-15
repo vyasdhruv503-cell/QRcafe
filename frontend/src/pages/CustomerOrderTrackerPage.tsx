@@ -9,60 +9,35 @@ interface CustomerOrderTrackerPageProps {
   onBackToMenu: () => void;
 }
 
-const FALLBACK_ORDER: OrderRecord = {
-  id: 'ord_1',
-  orderNumber: 105,
-  orderToken: 'ord_demo_105',
-  tableNumber: 'Table 01',
-  customerName: 'Guest Customer',
-  orderStatus: 'PREPARING',
-  paymentStatus: 'PENDING',
-  paymentMethod: 'PAY_AT_COUNTER',
-  subtotal: 95.0,
-  tax: 4.75,
-  discount: 0,
-  total: 99.75,
-  cafeName: 'TeaWala',
-  createdAt: new Date().toISOString(),
-  items: [
-    {
-      id: 'item_1',
-      productName: 'Traditional Tea (Full)',
-      price: 20.0,
-      quantity: 1,
-      subtotal: 20.0,
-    },
-    {
-      id: 'item_2',
-      productName: 'Aaloo Mutter Sandwich',
-      price: 60.0,
-      quantity: 1,
-      subtotal: 60.0,
-    },
-    {
-      id: 'item_3',
-      productName: 'Ginger Tea',
-      price: 35.0,
-      quantity: 1,
-      subtotal: 35.0,
-    },
-  ],
-} as any;
-
 export const CustomerOrderTrackerPage: React.FC<CustomerOrderTrackerPageProps> = ({
   orderToken,
   onBackToMenu,
 }) => {
-  const [order, setOrder] = useState<OrderRecord>(FALLBACK_ORDER);
+  const getInitialOrder = (): OrderRecord | null => {
+    try {
+      const storedOrdersObj = JSON.parse(localStorage.getItem('cafeqr_customer_orders_data') || '{}');
+      if (storedOrdersObj[orderToken]) {
+        return storedOrdersObj[orderToken];
+      }
+    } catch {
+      // Fall through to network fetch
+    }
+    return null;
+  };
+
+  const [order, setOrder] = useState<OrderRecord | null>(getInitialOrder);
+  const [isLoading, setIsLoading] = useState<boolean>(() => !getInitialOrder());
 
   const fetchOrderStatus = async () => {
     try {
       const data = await api.trackOrder(orderToken);
       if (data && data.orderNumber) {
         setOrder(data);
+        setIsLoading(false);
       }
     } catch (err) {
-      console.warn('API order track fallback active:', err);
+      console.warn('API order track error:', err);
+      setIsLoading(false);
     }
   };
 
@@ -73,7 +48,7 @@ export const CustomerOrderTrackerPage: React.FC<CustomerOrderTrackerPageProps> =
   }, [orderToken]);
 
   const steps = ['PENDING', 'ACCEPTED', 'PREPARING', 'READY', 'COMPLETED'];
-  const currentStepIndex = Math.max(0, steps.indexOf(order.orderStatus));
+  const currentStepIndex = order ? Math.max(0, steps.indexOf(order.orderStatus)) : 0;
 
   return (
     <div className="min-h-screen bg-[#140D0B] text-white p-4 max-w-lg mx-auto font-sans">
@@ -87,16 +62,30 @@ export const CustomerOrderTrackerPage: React.FC<CustomerOrderTrackerPageProps> =
           Back to Menu
         </button>
         <button
-          onClick={fetchOrderStatus}
+          onClick={() => {
+            setIsLoading(true);
+            fetchOrderStatus();
+          }}
           className="p-2 text-stone-400 hover:text-[#00F5D4] rounded-xl transition-colors"
           title="Refresh Status"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#00F5D4]' : ''}`} />
         </button>
       </div>
 
       {/* Main Order Card */}
-      <div className="bg-[#1F1512] rounded-3xl p-6 border border-[#38241D] shadow-2xl space-y-6">
+      {!order ? (
+        <div className="bg-[#1F1512] rounded-3xl p-8 border border-[#38241D] shadow-2xl space-y-6 text-center">
+          <div className="w-16 h-16 bg-[#281A15] border border-[#483027] rounded-full flex items-center justify-center mx-auto box-glow-green animate-pulse">
+            <RefreshCw className="w-7 h-7 text-[#00F5D4] animate-spin" />
+          </div>
+          <div className="space-y-1">
+            <h2 className="text-lg font-black text-white">Connecting to Kitchen...</h2>
+            <p className="text-xs text-stone-400">Loading your real-time order receipt & status.</p>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-[#1F1512] rounded-3xl p-6 border border-[#38241D] shadow-2xl space-y-6 animate-fadeIn">
         {/* Header info */}
         <div className="text-center pb-4 border-b border-[#33221B]">
           <div className="h-16 px-4 bg-[#281A15] border border-[#483027] rounded-2xl flex items-center justify-center mx-auto mb-3 box-glow-green inline-block">
@@ -180,6 +169,7 @@ export const CustomerOrderTrackerPage: React.FC<CustomerOrderTrackerPageProps> =
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };
