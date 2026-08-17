@@ -1,4 +1,10 @@
 import type { CafeInfo, TableInfo, Category, Product, OrderRecord, AuthUser, PaymentMethod } from '../types';
+import {
+  DEFAULT_CAFE,
+  DEFAULT_TABLES,
+  DEFAULT_CATEGORIES,
+  DEFAULT_PRODUCTS,
+} from '../data/defaultMenu';
 
 const API_BASE_URL =
   window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
@@ -56,34 +62,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 // Fallback Datasets for Demo Resilience
-const MOCK_CAFE: CafeInfo = {
-  id: 'cafe_1',
-  name: 'TeaWala',
-  logo: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500&auto=format&fit=crop&q=80',
-  address: '123 Gourmet Street, Culinary Quarter',
-  phone: '+1 (555) 234-5678',
-  email: 'hello@mycafe.com',
-  taxRate: 5.0,
-  currency: '₹',
-  openHours: '8:00 AM - 10:00 PM',
-};
-
-const loadSavedOrInitial = <T>(key: string, defaults: T): T => {
-  try {
-    const stored = localStorage.getItem(key);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      // Auto-invalidate stale pizza/burger mock data
-      const jsonStr = JSON.stringify(parsed);
-      if (jsonStr.includes('Margherita') || jsonStr.includes('Pepperoni')) {
-        localStorage.removeItem(key);
-        return defaults;
-      }
-      return parsed;
-    }
-  } catch (e) {}
-  return defaults;
-};
+let MOCK_CAFE: CafeInfo = DEFAULT_CAFE;
 
 const saveMockState = (key: string, data: any) => {
   try {
@@ -91,34 +70,32 @@ const saveMockState = (key: string, data: any) => {
   } catch (e) {}
 };
 
-let MOCK_TABLES: TableInfo[] = loadSavedOrInitial('cafeqr_mock_tables', [
-  { id: 'tbl_1', number: 'Table 01', capacity: 4, qrToken: 'tok_table01_demo', isActive: true },
-  { id: 'tbl_2', number: 'Table 02', capacity: 2, qrToken: 'tok_table02_demo', isActive: true },
-  { id: 'tbl_3', number: 'Table 03', capacity: 4, qrToken: 'tok_table03_demo', isActive: true },
-  { id: 'tbl_4', number: 'Table 04', capacity: 6, qrToken: 'tok_table04_demo', isActive: true },
-  { id: 'tbl_5', number: 'Table 05', capacity: 4, qrToken: 'tok_table05_demo', isActive: true },
-  { id: 'tbl_6', number: 'Table 06', capacity: 8, qrToken: 'tok_table06_demo', isActive: true },
-]);
+const loadSavedOrInitial = <T>(key: string, defaults: T): T => {
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Auto-upgrade if previous storage had stale mock data or incomplete 7-item mock
+      const jsonStr = JSON.stringify(parsed);
+      if (
+        jsonStr.includes('Margherita') ||
+        jsonStr.includes('Pepperoni') ||
+        (Array.isArray(parsed) && key === 'cafeqr_mock_products' && parsed.length < 20) ||
+        (Array.isArray(parsed) && key === 'cafeqr_mock_categories' && parsed.length < 10)
+      ) {
+        localStorage.setItem(key, JSON.stringify(defaults));
+        return defaults;
+      }
+      return parsed;
+    }
+  } catch (e) {}
+  saveMockState(key, defaults);
+  return defaults;
+};
 
-let MOCK_CATEGORIES: Category[] = loadSavedOrInitial('cafeqr_mock_categories', [
-  { id: 'cat_1', name: 'Milk Tea', description: 'Traditional spiced milk teas & aromatic herbal tea blends', sortOrder: 1, productCount: 4, isActive: true },
-  { id: 'cat_2', name: 'No Milk Tea', description: 'Refreshing black teas, green teas & herbal kahwa infusions', sortOrder: 2, productCount: 2, isActive: true },
-  { id: 'cat_3', name: 'Café Addiction', description: 'Signature hot & chilled coffees, flavored coffees & hot chocolate', sortOrder: 3, productCount: 2, isActive: true },
-  { id: 'cat_4', name: 'Sandwiches', description: 'Freshly grilled paninis, cheese chutney & layered club sandwiches', sortOrder: 4, productCount: 2, isActive: true },
-  { id: 'cat_5', name: 'Frankies & Burger', description: 'Crispy veg & paneer rolls, Schezwan rolls & loaded gourmet burgers', sortOrder: 5, productCount: 2, isActive: true },
-  { id: 'cat_6', name: 'Maggi', description: 'Hot, cheesy, buttery & spiced instant Maggi noodles bowls', sortOrder: 6, productCount: 2, isActive: true },
-  { id: 'cat_7', name: 'Healthy Snack', description: 'Fresh Gujarati methi thepla, hot rava upma & masala oats', sortOrder: 7, productCount: 2, isActive: true },
-]);
-
-let MOCK_PRODUCTS: Product[] = loadSavedOrInitial('cafeqr_mock_products', [
-  { id: 'prod_1', categoryId: 'cat_1', categoryName: 'Milk Tea', name: 'Traditional Tea (Half)', description: 'Classic cutting chai brewed with milk, cardamom & tea leaves (Half cup)', price: 12.0, image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 5 },
-  { id: 'prod_2', categoryId: 'cat_1', categoryName: 'Milk Tea', name: 'Traditional Tea (Full)', description: 'Classic rich milk tea brewed with cardamom & tea leaves (Full cup)', price: 20.0, image: 'https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 5 },
-  { id: 'prod_3', categoryId: 'cat_1', categoryName: 'Milk Tea', name: 'Ginger Tea', description: 'Steaming hot milk tea infused with freshly crushed ginger', price: 35.0, image: 'https://images.unsplash.com/photo-1561336313-0bd5e0b27ec8?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: false, isAvailable: true, preparationTime: 5 },
-  { id: 'prod_4', categoryId: 'cat_3', categoryName: 'Café Addiction', name: 'Hot Coffee', description: 'Freshly brewed aromatic hot milk coffee', price: 35.0, image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 5 },
-  { id: 'prod_5', categoryId: 'cat_3', categoryName: 'Café Addiction', name: 'Cold Coffee', description: 'Thick, creamy chilled espresso blended with milk and vanilla ice cream', price: 60.0, image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 7 },
-  { id: 'prod_6', categoryId: 'cat_4', categoryName: 'Sandwiches', name: 'Aaloo Mutter Sandwich', description: 'Spiced potato & green peas masala grilled sandwich', price: 60.0, image: 'https://images.unsplash.com/photo-1539252554453-80ab65ce3586?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: false, isAvailable: true, preparationTime: 6 },
-  { id: 'prod_7', categoryId: 'cat_4', categoryName: 'Sandwiches', name: 'Veg Cheese Schezwan', description: 'Loaded vegetables, spicy Schezwan sauce & melted cheese grilled toast', price: 100.0, image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&auto=format&fit=crop&q=80', isVeg: true, isFeatured: true, isAvailable: true, preparationTime: 8 },
-]);
+let MOCK_TABLES: TableInfo[] = loadSavedOrInitial('cafeqr_mock_tables', DEFAULT_TABLES);
+let MOCK_CATEGORIES: Category[] = loadSavedOrInitial('cafeqr_mock_categories', DEFAULT_CATEGORIES);
+let MOCK_PRODUCTS: Product[] = loadSavedOrInitial('cafeqr_mock_products', DEFAULT_PRODUCTS);
 
 let MOCK_STAFF: AuthUser[] = [
   { id: 'usr_1', staffId: 'STF-101', name: 'Cafe Admin Manager', email: 'admin@cafeqr.com', role: 'ADMIN', cafeId: 'cafe_1', cafeName: 'TeaWala', currency: '₹', createdAt: new Date().toISOString() },
@@ -207,6 +184,27 @@ const loadInitialMockOrders = (): OrderRecord[] => {
 let MOCK_ORDERS: OrderRecord[] = loadInitialMockOrders();
 
 export const api = {
+  // Synchronous Local State Getters for 0ms Instant Hydration
+  getLocalCafe(): CafeInfo {
+    return MOCK_CAFE || DEFAULT_CAFE;
+  },
+
+  getLocalTable(tableToken?: string): TableInfo {
+    if (tableToken) {
+      const found = MOCK_TABLES.find((t) => t.qrToken === tableToken);
+      if (found) return found;
+    }
+    return MOCK_TABLES[0] || DEFAULT_TABLES[0];
+  },
+
+  getLocalCategories(): Category[] {
+    return MOCK_CATEGORIES && MOCK_CATEGORIES.length >= 10 ? MOCK_CATEGORIES : DEFAULT_CATEGORIES;
+  },
+
+  getLocalProducts(): Product[] {
+    return MOCK_PRODUCTS && MOCK_PRODUCTS.length >= 20 ? MOCK_PRODUCTS : DEFAULT_PRODUCTS;
+  },
+
   // --- Public Guest Customer API ---
   async getMenu(tableToken: string): Promise<{
     cafe: CafeInfo;
@@ -555,6 +553,7 @@ export const api = {
         preparationTime: data.preparationTime || 15,
       };
       MOCK_PRODUCTS.unshift(newProd);
+      saveMockState('cafeqr_mock_products', MOCK_PRODUCTS);
       return newProd;
     }
   },
@@ -576,6 +575,7 @@ export const api = {
           if (cat) data.categoryName = cat.name;
         }
         MOCK_PRODUCTS[idx] = { ...MOCK_PRODUCTS[idx], ...data };
+        saveMockState('cafeqr_mock_products', MOCK_PRODUCTS);
         return MOCK_PRODUCTS[idx];
       }
       throw err;
@@ -594,6 +594,7 @@ export const api = {
       const idx = MOCK_PRODUCTS.findIndex((p) => p.id === id);
       if (idx !== -1) {
         MOCK_PRODUCTS[idx].isAvailable = !MOCK_PRODUCTS[idx].isAvailable;
+        saveMockState('cafeqr_mock_products', MOCK_PRODUCTS);
         return MOCK_PRODUCTS[idx];
       }
       throw err;
@@ -610,6 +611,7 @@ export const api = {
     } catch (err) {
       console.warn('Backend product delete offline, removing local mock product:', err);
       MOCK_PRODUCTS = MOCK_PRODUCTS.filter((p) => p.id !== id);
+      saveMockState('cafeqr_mock_products', MOCK_PRODUCTS);
       return { message: 'Product deleted successfully (Offline Mode).' };
     }
   },
@@ -620,8 +622,11 @@ export const api = {
       const res = await fetch(`${API_BASE_URL}/admin/categories`, { headers: await getAuthHeaders('ADMIN') });
       return await handleResponse(res);
     } catch (err) {
-      console.warn('Admin categories endpoint offline, returning local categories:', err);
-      return MOCK_CATEGORIES;
+      console.warn('Admin categories endpoint offline, returning local categories with dynamic counts:', err);
+      return MOCK_CATEGORIES.map((cat) => ({
+        ...cat,
+        productCount: MOCK_PRODUCTS.filter((p) => p.categoryId === cat.id || p.categoryName === cat.name).length,
+      }));
     }
   },
 
@@ -639,12 +644,13 @@ export const api = {
         id: `cat_${Date.now()}`,
         name: data.name || 'New Category',
         description: data.description || '',
-        image: data.image || '',
+        image: data.image || 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=500&auto=format&fit=crop&q=80',
         sortOrder: data.sortOrder || MOCK_CATEGORIES.length + 1,
         isActive: data.isActive ?? true,
         productCount: 0,
       };
       MOCK_CATEGORIES.push(newCat);
+      saveMockState('cafeqr_mock_categories', MOCK_CATEGORIES);
       return newCat;
     }
   },
@@ -662,6 +668,7 @@ export const api = {
       const idx = MOCK_CATEGORIES.findIndex((c) => c.id === id);
       if (idx !== -1) {
         MOCK_CATEGORIES[idx] = { ...MOCK_CATEGORIES[idx], ...data };
+        saveMockState('cafeqr_mock_categories', MOCK_CATEGORIES);
         return MOCK_CATEGORIES[idx];
       }
       throw err;
@@ -678,6 +685,7 @@ export const api = {
     } catch (err) {
       console.warn('Backend category delete offline, removing local mock category:', err);
       MOCK_CATEGORIES = MOCK_CATEGORIES.filter((c) => c.id !== id);
+      saveMockState('cafeqr_mock_categories', MOCK_CATEGORIES);
       return { message: 'Category deleted successfully (Offline Mode).' };
     }
   },
@@ -712,6 +720,7 @@ export const api = {
         isActive: true,
       };
       MOCK_TABLES.push(newTbl);
+      saveMockState('cafeqr_mock_tables', MOCK_TABLES);
       return newTbl;
     }
   },
@@ -728,6 +737,7 @@ export const api = {
       const idx = MOCK_TABLES.findIndex((t) => t.id === tableId);
       if (idx !== -1) {
         MOCK_TABLES[idx].qrToken = `tok_${Date.now()}`;
+        saveMockState('cafeqr_mock_tables', MOCK_TABLES);
         return MOCK_TABLES[idx];
       }
       throw err;
@@ -739,9 +749,9 @@ export const api = {
       const res = await fetch(`${API_BASE_URL}/admin/tables/qr-image/${qrToken}`, { headers: await getAuthHeaders('ADMIN') });
       return await handleResponse(res);
     } catch (err) {
-      const menuUrl = `http://localhost:5173/menu?table=${qrToken}`;
-      // SVG Data URL for QR preview fallback
-      const qrDataUrl = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"><rect width="200" height="200" fill="%23ffffff"/><rect x="20" y="20" width="60" height="60" fill="%23000000"/><rect x="30" y="30" width="40" height="40" fill="%23ffffff"/><rect x="40" y="40" width="20" height="20" fill="%23000000"/><rect x="120" y="20" width="60" height="60" fill="%23000000"/><rect x="130" y="30" width="40" height="40" fill="%23ffffff"/><rect x="140" y="40" width="20" height="20" fill="%23000000"/><rect x="20" y="120" width="60" height="60" fill="%23000000"/><rect x="30" y="130" width="40" height="40" fill="%23ffffff"/><rect x="40" y="140" width="20" height="20" fill="%23000000"/><rect x="90" y="90" width="20" height="20" fill="%23d97706"/><text x="100" y="180" font-size="12" font-weight="bold" text-anchor="middle" fill="%23000000">Scan QR</text></svg>`;
+      const menuUrl = `${window.location.origin}/?table=${qrToken}`;
+      // Clean SVG Data URL for QR preview fallback
+      const qrDataUrl = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240" viewBox="0 0 240 240"><rect width="240" height="240" fill="%23ffffff" rx="16"/><rect x="20" y="20" width="65" height="65" fill="%231C120E" rx="8"/><rect x="32" y="32" width="41" height="41" fill="%23ffffff" rx="4"/><rect x="42" y="42" width="21" height="21" fill="%2300F5D4" rx="2"/><rect x="155" y="20" width="65" height="65" fill="%231C120E" rx="8"/><rect x="167" y="32" width="41" height="41" fill="%23ffffff" rx="4"/><rect x="177" y="42" width="21" height="21" fill="%2300F5D4" rx="2"/><rect x="20" y="155" width="65" height="65" fill="%231C120E" rx="8"/><rect x="32" y="167" width="41" height="41" fill="%23ffffff" rx="4"/><rect x="42" y="177" width="21" height="21" fill="%2300F5D4" rx="2"/><rect x="105" y="30" width="20" height="40" fill="%231C120E" rx="3"/><rect x="100" y="95" width="40" height="50" fill="%231C120E" rx="4"/><rect x="160" y="105" width="25" height="20" fill="%231C120E" rx="2"/><rect x="195" y="105" width="25" height="45" fill="%231C120E" rx="2"/><rect x="105" y="165" width="40" height="20" fill="%231C120E" rx="2"/><rect x="165" y="165" width="55" height="55" fill="%2300F5D4" rx="6"/><rect x="105" y="195" width="25" height="25" fill="%231C120E" rx="3"/><text x="120" y="232" font-family="sans-serif" font-size="9" font-weight="900" text-anchor="middle" fill="%231C120E">SCAN TABLE QR</text></svg>`;
       return { menuUrl, qrDataUrl };
     }
   },
@@ -894,7 +904,10 @@ export const api = {
       });
       return await handleResponse(res);
     } catch (err) {
-      throw err;
+      console.warn('Backend settings update offline, updating local mock cafe:', err);
+      MOCK_CAFE = { ...MOCK_CAFE, ...data };
+      saveMockState('cafeqr_mock_cafe', MOCK_CAFE);
+      return MOCK_CAFE;
     }
   },
 

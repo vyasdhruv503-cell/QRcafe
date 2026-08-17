@@ -15,139 +15,16 @@ interface CustomerMenuPageProps {
   onOrderPlaced: (orderToken: string) => void;
 }
 
-// Seamless Fallback Menu Dataset (TeaWala Authentic Digital Menu)
-const FALLBACK_CAFE: CafeInfo = {
-  id: 'cafe_1',
-  name: 'TeaWala',
-  logo: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500&auto=format&fit=crop&q=80',
-  address: '123 Gourmet Street, Culinary Quarter',
-  phone: '+1 (555) 234-5678',
-  taxRate: 5.0,
-  currency: '₹',
-  openHours: '8:00 AM - 10:00 PM',
-};
-
-const FALLBACK_TABLE: TableInfo = {
-  id: 'tbl_1',
-  number: 'Table 01',
-  capacity: 4,
-  qrToken: 'tok_table01_demo',
-};
-
-const FALLBACK_CATEGORIES: Category[] = [
-  { id: 'cat_1', name: 'Milk Tea', description: 'Traditional spiced milk teas & aromatic herbal tea blends', sortOrder: 1 },
-  { id: 'cat_2', name: 'No Milk Tea', description: 'Refreshing black teas, green teas & herbal kahwa infusions', sortOrder: 2 },
-  { id: 'cat_3', name: 'Café Addiction', description: 'Signature hot & chilled coffees, flavored coffees & hot chocolate', sortOrder: 3 },
-  { id: 'cat_4', name: 'Sandwiches', description: 'Freshly grilled paninis, cheese chutney & layered club sandwiches', sortOrder: 4 },
-  { id: 'cat_5', name: 'Frankies & Burger', description: 'Crispy veg & paneer rolls, Schezwan rolls & loaded gourmet burgers', sortOrder: 5 },
-  { id: 'cat_6', name: 'Maggi', description: 'Hot, cheesy, buttery & spiced instant Maggi noodles bowls', sortOrder: 6 },
-  { id: 'cat_7', name: 'Healthy Snack', description: 'Fresh Gujarati methi thepla, hot rava upma & masala oats', sortOrder: 7 },
-];
-
-const FALLBACK_PRODUCTS: Product[] = [
-  {
-    id: 'prod_1',
-    categoryId: 'cat_1',
-    categoryName: 'Milk Tea',
-    name: 'Traditional Tea (Half)',
-    description: 'Classic cutting chai brewed with milk, cardamom & tea leaves (Half cup)',
-    price: 12.0,
-    image: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500&auto=format&fit=crop&q=80',
-    isVeg: true,
-    isFeatured: true,
-    isAvailable: true,
-    preparationTime: 5,
-  },
-  {
-    id: 'prod_2',
-    categoryId: 'cat_1',
-    categoryName: 'Milk Tea',
-    name: 'Traditional Tea (Full)',
-    description: 'Classic rich milk tea brewed with cardamom & tea leaves (Full cup)',
-    price: 20.0,
-    image: 'https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=500&auto=format&fit=crop&q=80',
-    isVeg: true,
-    isFeatured: true,
-    isAvailable: true,
-    preparationTime: 5,
-  },
-  {
-    id: 'prod_3',
-    categoryId: 'cat_1',
-    categoryName: 'Milk Tea',
-    name: 'Ginger Tea',
-    description: 'Steaming hot milk tea infused with freshly crushed ginger',
-    price: 35.0,
-    image: 'https://images.unsplash.com/photo-1561336313-0bd5e0b27ec8?w=500&auto=format&fit=crop&q=80',
-    isVeg: true,
-    isFeatured: false,
-    isAvailable: true,
-    preparationTime: 5,
-  },
-  {
-    id: 'prod_4',
-    categoryId: 'cat_3',
-    categoryName: 'Café Addiction',
-    name: 'Hot Coffee',
-    description: 'Freshly brewed aromatic hot milk coffee',
-    price: 35.0,
-    image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&auto=format&fit=crop&q=80',
-    isVeg: true,
-    isFeatured: true,
-    isAvailable: true,
-    preparationTime: 5,
-  },
-  {
-    id: 'prod_5',
-    categoryId: 'cat_3',
-    categoryName: 'Café Addiction',
-    name: 'Cold Coffee',
-    description: 'Thick, creamy chilled espresso blended with milk and vanilla ice cream',
-    price: 60.0,
-    image: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&auto=format&fit=crop&q=80',
-    isVeg: true,
-    isFeatured: true,
-    isAvailable: true,
-    preparationTime: 7,
-  },
-  {
-    id: 'prod_6',
-    categoryId: 'cat_4',
-    categoryName: 'Sandwiches',
-    name: 'Aaloo Mutter Sandwich',
-    description: 'Spiced potato & green peas masala grilled sandwich',
-    price: 60.0,
-    image: 'https://images.unsplash.com/photo-1539252554453-80ab65ce3586?w=500&auto=format&fit=crop&q=80',
-    isVeg: true,
-    isFeatured: false,
-    isAvailable: true,
-    preparationTime: 6,
-  },
-  {
-    id: 'prod_7',
-    categoryId: 'cat_4',
-    categoryName: 'Sandwiches',
-    name: 'Veg Cheese Schezwan',
-    description: 'Loaded vegetables, spicy Schezwan sauce & melted cheese grilled toast',
-    price: 100.0,
-    image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=500&auto=format&fit=crop&q=80',
-    isVeg: true,
-    isFeatured: true,
-    isAvailable: true,
-    preparationTime: 8,
-  },
-];
-
 type SortMode = 'price_asc' | 'price_desc' | 'featured';
 
 export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
   tableToken,
   onOrderPlaced,
 }) => {
-  const [cafe, setCafe] = useState<CafeInfo>(FALLBACK_CAFE);
-  const [table, setTable] = useState<TableInfo>(FALLBACK_TABLE);
-  const [categories, setCategories] = useState<Category[]>(FALLBACK_CATEGORIES);
-  const [products, setProducts] = useState<Product[]>(FALLBACK_PRODUCTS);
+  const [cafe, setCafe] = useState<CafeInfo>(() => api.getLocalCafe());
+  const [table, setTable] = useState<TableInfo>(() => api.getLocalTable(tableToken));
+  const [categories, setCategories] = useState<Category[]>(() => api.getLocalCategories());
+  const [products, setProducts] = useState<Product[]>(() => api.getLocalProducts());
 
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -171,7 +48,7 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
     }
   };
 
-  // Fetch menu data by QR table token
+  // Fetch menu data by QR table token (background silent sync)
   const loadMenuData = async () => {
     if (products.length === 0) {
       setIsLoading(true);
@@ -194,6 +71,10 @@ export const CustomerMenuPage: React.FC<CustomerMenuPageProps> = ({
   };
 
   useEffect(() => {
+    // Synchronize local table and state immediately when tableToken prop changes
+    setTable(api.getLocalTable(tableToken));
+    setCategories(api.getLocalCategories());
+    setProducts(api.getLocalProducts());
     loadMenuData();
     loadOrderHistory();
   }, [tableToken]);

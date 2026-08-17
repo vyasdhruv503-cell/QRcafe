@@ -192,15 +192,17 @@ export const QRPreviewModal: React.FC<QRPreviewModalProps> = ({
               No App Download Required • Smart Table QR
             </div>
 
-            <div class="saucer-base"></div>
+          <div style="margin-top: 24px; text-align: center;" class="no-print">
+            <button onclick="window.print()" style="background:#10B981; color:#fff; border:none; padding:10px 24px; font-size:14px; font-weight:bold; border-radius:12px; cursor:pointer; box-shadow:0 4px 12px rgba(16,185,129,0.3);">
+              🖨️ Print Standee
+            </button>
           </div>
 
           <script>
             window.onload = function() {
               setTimeout(function() {
                 window.print();
-                window.close();
-              }, 400);
+              }, 500);
             };
           </script>
         </body>
@@ -293,7 +295,14 @@ export const QRPreviewModal: React.FC<QRPreviewModalProps> = ({
 
         {/* Action Controls (Hidden when printing) */}
         <div className="flex items-center justify-center gap-3 mt-8 no-print">
-          <Button variant="outline" size="sm" onClick={() => window.open(menuUrl, '_blank')}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const url = menuUrl || `${window.location.origin}/?table=${table.qrToken}`;
+              window.open(url, '_blank');
+            }}
+          >
             <ExternalLink className="w-4 h-4 mr-1.5" />
             Open Menu Link
           </Button>

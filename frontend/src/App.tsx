@@ -39,19 +39,10 @@ export const App: React.FC = () => {
     if (tableParam) {
       setTableToken(tableParam);
       setView('customer_menu');
-      setIsInitializing(false);
-      return;
-    }
-
-    if (orderParam) {
+    } else if (orderParam) {
       setOrderToken(orderParam);
       setView('customer_tracker');
-      setIsInitializing(false);
-      return;
-    }
-
-    // 2. Direct path routing
-    if (path.includes('/admin/login') || path.includes('/login')) {
+    } else if (path.includes('/admin/login') || path.includes('/login')) {
       setView('login');
     } else if (path.includes('/admin')) {
       setView('admin');
@@ -62,7 +53,7 @@ export const App: React.FC = () => {
       setView('customer_menu');
     }
 
-    // 3. Instant local user hydration (0ms delay)
+    // 2. Instant local user hydration (0ms delay)
     const token = localStorage.getItem('cafeqr_token');
     const userStr = localStorage.getItem('cafeqr_user');
     if (token && userStr) {
@@ -77,7 +68,7 @@ export const App: React.FC = () => {
     // Unblock UI immediately — zero loading delay
     setIsInitializing(false);
 
-    // 4. Verify token asynchronously in background
+    // 3. Verify token asynchronously in background
     if (token) {
       api
         .getMe()
@@ -97,10 +88,25 @@ export const App: React.FC = () => {
     // Listen for back/forward browser navigation
     const handlePopState = () => {
       const p = window.location.pathname;
-      if (p.includes('/admin/login') || p.includes('/login')) setView('login');
-      else if (p.includes('/admin')) setView('admin');
-      else if (p.includes('/kitchen')) setView('kitchen');
-      else setView('customer_menu');
+      const sp = new URLSearchParams(window.location.search);
+      const t = sp.get('table');
+      const o = sp.get('order');
+
+      if (t) {
+        setTableToken(t);
+        setView('customer_menu');
+      } else if (o) {
+        setOrderToken(o);
+        setView('customer_tracker');
+      } else if (p.includes('/admin/login') || p.includes('/login')) {
+        setView('login');
+      } else if (p.includes('/admin')) {
+        setView('admin');
+      } else if (p.includes('/kitchen')) {
+        setView('kitchen');
+      } else {
+        setView('customer_menu');
+      }
     };
 
     window.addEventListener('popstate', handlePopState);
