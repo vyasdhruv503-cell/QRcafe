@@ -27,6 +27,7 @@ import {
   History,
   IdCard,
   Download,
+  FileSpreadsheet,
   X,
 } from 'lucide-react';
 import {
@@ -38,6 +39,27 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts';
+import * as XLSX from 'xlsx';
+
+// Helper to format date and time like "Aug 15, 2026 08:04 PM" matching the user's Excel template
+const formatDateTime = (isoStr: string) => {
+  try {
+    const d = new Date(isoStr);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const month = months[d.getMonth()];
+    const day = d.getDate().toString().padStart(2, '0');
+    const year = d.getFullYear();
+    let hours = d.getHours();
+    const minutes = d.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const hourStr = hours.toString().padStart(2, '0');
+    return `${month} ${day}, ${year} ${hourStr}:${minutes} ${ampm}`;
+  } catch {
+    return isoStr;
+  }
+};
 
 interface AdminDashboardPageProps {
   user: AuthUser;
@@ -95,6 +117,49 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // Download Order History Excel (.xlsx) Handler matching exact schema from user screenshot
+  const handleDownloadHistoryExcel = () => {
+    if (orders.length === 0) {
+      alert('No orders available to download for the selected filters.');
+      return;
+    }
+
+    const excelData = orders.map((o) => {
+      const itemsStr = o.items
+        ? o.items.map((i) => `${i.quantity}x ${i.productName}`).join(', ')
+        : 'No items';
+
+      return {
+        'Order #': `#${o.orderNumber}`,
+        'Date & Time': formatDateTime(o.createdAt),
+        'Table': o.tableNumber || 'Table 01',
+        'Customer': o.customerName || 'Guest Customer',
+        'Items': itemsStr,
+        'Total (₹)': `₹${Number(o.total || 0).toFixed(2)}`,
+        'Status': o.orderStatus || 'COMPLETED',
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+    // Set custom column widths for clean spreadsheet layout
+    worksheet['!cols'] = [
+      { wch: 10 }, // Order #
+      { wch: 24 }, // Date & Time
+      { wch: 14 }, // Table
+      { wch: 18 }, // Customer
+      { wch: 45 }, // Items
+      { wch: 14 }, // Total (₹)
+      { wch: 14 }, // Status
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Order History');
+
+    const dateLabel = orderDateFilter ? orderDateFilter : orderRangeFilter || 'all-dates';
+    XLSX.writeFile(workbook, `CafeQR_Order_History_${dateLabel}.xlsx`);
+  };
+
   // Download Order History CSV Handler
   const handleDownloadHistoryCSV = () => {
     if (orders.length === 0) {
@@ -103,45 +168,28 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     }
 
     const headers = [
-      'Order Number',
-      'Date',
-      'Time',
-      'Table Number',
-      'Customer Name',
-      'Customer Phone',
-      'Items Summary',
-      'Subtotal (INR)',
-      'Tax (INR)',
-      'Discount (INR)',
-      'Total Amount (INR)',
-      'Order Status',
-      'Payment Status',
-      'Payment Method',
+      'Order #',
+      'Date & Time',
+      'Table',
+      'Customer',
+      'Items',
+      'Total (₹)',
+      'Status',
     ];
 
     const csvRows = orders.map((o) => {
-      const dateObj = new Date(o.createdAt);
-      const dateStr = dateObj.toLocaleDateString();
-      const timeStr = dateObj.toLocaleTimeString();
       const itemsStr = o.items
-        ? o.items.map((i) => `${i.quantity}x ${i.productName}`).join('; ')
+        ? o.items.map((i) => `${i.quantity}x ${i.productName}`).join(', ')
         : '';
 
       return [
-        `"ORD-${o.orderNumber}"`,
-        `"${dateStr}"`,
-        `"${timeStr}"`,
-        `"${o.tableNumber || ''}"`,
+        `"#${o.orderNumber}"`,
+        `"${formatDateTime(o.createdAt)}"`,
+        `"${o.tableNumber || 'Table 01'}"`,
         `"${(o.customerName || 'Guest Customer').replace(/"/g, '""')}"`,
-        `"${(o.customerPhone || '').replace(/"/g, '""')}"`,
         `"${itemsStr.replace(/"/g, '""')}"`,
-        Number(o.subtotal || 0).toFixed(2),
-        Number(o.tax || 0).toFixed(2),
-        Number(o.discount || 0).toFixed(2),
-        Number(o.total || 0).toFixed(2),
-        `"${o.orderStatus || 'PENDING'}"`,
-        `"${o.paymentStatus || 'PENDING'}"`,
-        `"${o.paymentMethod || 'PAY_AT_COUNTER'}"`,
+        `"₹${Number(o.total || 0).toFixed(2)}"`,
+        `"${o.orderStatus || 'COMPLETED'}"`,
       ].join(',');
     });
 
@@ -152,7 +200,7 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
     const link = document.createElement('a');
     link.href = url;
     const dateLabel = orderDateFilter ? orderDateFilter : orderRangeFilter || 'all-dates';
-    link.setAttribute('download', `TeaWala_Order_History_${dateLabel}.csv`);
+    link.setAttribute('download', `CafeQR_Order_History_${dateLabel}.csv`);
     document.body.appendChild(link);
     link.click();
     setTimeout(() => {
@@ -842,15 +890,26 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
                     )}
                   </div>
 
-                  {/* Download History CSV Button */}
-                  <button
-                    onClick={handleDownloadHistoryCSV}
-                    className="px-4 py-2 rounded-2xl text-xs font-black bg-[#10B981] hover:bg-[#0D9668] text-white shadow-md transition-all flex items-center gap-2 active:scale-95 shrink-0"
-                    title="Download current order history as CSV file"
-                  >
-                    <Download className="w-4 h-4 stroke-[2.5]" />
-                    <span>Download History (CSV)</span>
-                  </button>
+                  {/* Export Options: Excel & CSV */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={handleDownloadHistoryExcel}
+                      className="px-4 py-2 rounded-2xl text-xs font-black bg-[#10B981] hover:bg-[#0D9668] text-white shadow-md transition-all flex items-center gap-2 active:scale-95 shrink-0"
+                      title="Download order history as Excel (.xlsx) spreadsheet matching table layout"
+                    >
+                      <FileSpreadsheet className="w-4 h-4 stroke-[2.5]" />
+                      <span>Download Excel (.xlsx)</span>
+                    </button>
+
+                    <button
+                      onClick={handleDownloadHistoryCSV}
+                      className="px-3.5 py-2 rounded-2xl text-xs font-bold bg-white hover:bg-[#FAF7F2] text-stone-700 border border-[#E2DCD5] shadow-xs transition-all flex items-center gap-1.5 active:scale-95 shrink-0"
+                      title="Download current order history as CSV file"
+                    >
+                      <Download className="w-4 h-4 text-stone-500" />
+                      <span>CSV</span>
+                    </button>
+                  </div>
                 </div>
               </div>
 
