@@ -123,13 +123,15 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
       const dateObj = new Date(o.createdAt);
       const dateStr = dateObj.toLocaleDateString();
       const timeStr = dateObj.toLocaleTimeString();
-      const itemsStr = o.items ? o.items.map((i) => `${i.quantity}x ${i.productName}`).join(' | ') : '';
+      const itemsStr = o.items
+        ? o.items.map((i) => `${i.quantity}x ${i.productName}`).join('; ')
+        : '';
 
       return [
-        `"#${o.orderNumber}"`,
+        `"ORD-${o.orderNumber}"`,
         `"${dateStr}"`,
         `"${timeStr}"`,
-        `"${o.tableNumber}"`,
+        `"${o.tableNumber || ''}"`,
         `"${(o.customerName || 'Guest Customer').replace(/"/g, '""')}"`,
         `"${(o.customerPhone || '').replace(/"/g, '""')}"`,
         `"${itemsStr.replace(/"/g, '""')}"`,
@@ -137,21 +139,26 @@ export const AdminDashboardPage: React.FC<AdminDashboardPageProps> = ({
         Number(o.tax || 0).toFixed(2),
         Number(o.discount || 0).toFixed(2),
         Number(o.total || 0).toFixed(2),
-        `"${o.orderStatus}"`,
-        `"${o.paymentStatus}"`,
-        `"${o.paymentMethod}"`,
-      ];
+        `"${o.orderStatus || 'PENDING'}"`,
+        `"${o.paymentStatus || 'PENDING'}"`,
+        `"${o.paymentMethod || 'PAY_AT_COUNTER'}"`,
+      ].join(',');
     });
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...csvRows.map((e) => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
+    const csvString = [headers.join(','), ...csvRows].join('\r\n');
+    // Prepend UTF-8 BOM (\uFEFF) so Excel and all spreadsheet software display special characters, Hindi, and columns properly
+    const blob = new Blob(['\uFEFF' + csvString], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
+    link.href = url;
     const dateLabel = orderDateFilter ? orderDateFilter : orderRangeFilter || 'all-dates';
-    link.setAttribute('download', `CafeQR_Order_History_${dateLabel}.csv`);
+    link.setAttribute('download', `TeaWala_Order_History_${dateLabel}.csv`);
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }, 100);
   };
 
   // Load tab data dynamically

@@ -779,8 +779,41 @@ export const api = {
       const apiOrders = await handleResponse<OrderRecord[]>(res);
       return Array.isArray(apiOrders) ? apiOrders : [];
     } catch (err) {
-      console.warn('Admin orders endpoint failed, returning local orders:', err);
-      return MOCK_ORDERS;
+      console.warn('Admin orders endpoint failed, returning filtered local orders:', err);
+      MOCK_ORDERS = loadInitialMockOrders();
+      let filtered = [...MOCK_ORDERS];
+
+      if (status && status !== 'ALL') {
+        filtered = filtered.filter((o) => o.orderStatus === status);
+      }
+
+      if (search && search.trim()) {
+        const q = search.toLowerCase();
+        filtered = filtered.filter((o) =>
+          (o.orderNumber && o.orderNumber.toString().includes(q)) ||
+          (o.tableNumber && o.tableNumber.toLowerCase().includes(q)) ||
+          (o.customerName && o.customerName.toLowerCase().includes(q)) ||
+          (o.customerPhone && o.customerPhone.toLowerCase().includes(q))
+        );
+      }
+
+      if (date) {
+        filtered = filtered.filter((o) => o.createdAt && o.createdAt.startsWith(date));
+      } else if (startDate && endDate) {
+        filtered = filtered.filter((o) => {
+          const d = o.createdAt ? o.createdAt.split('T')[0] : '';
+          return d >= startDate && d <= endDate;
+        });
+      } else if (range === '7days') {
+        const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+        filtered = filtered.filter((o) => new Date(o.createdAt).getTime() >= sevenDaysAgo);
+      } else if (range === '30days') {
+        const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+        filtered = filtered.filter((o) => new Date(o.createdAt).getTime() >= thirtyDaysAgo);
+      }
+
+      // Sort by newest order first
+      return filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
   },
 
